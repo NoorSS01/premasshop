@@ -6,7 +6,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
 import axios from 'axios';
 
-const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:3000';
+// const APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:3000';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 interface AddressForm {

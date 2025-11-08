@@ -18,8 +18,8 @@ export default function AdminProducts() {
     weight: '',
     unit: 'piece',
   });
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory] = useState('all');
+  const [searchQuery] = useState('');
 
   const categories = [
     { id: 'water', name: 'Water', active: true },
@@ -52,7 +52,7 @@ export default function AdminProducts() {
     },
   });
 
-  const { data: categoryStats } = useQuery({
+  const { data: _categoryStats } = useQuery({
     queryKey: ['category-stats'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -163,14 +163,15 @@ export default function AdminProducts() {
     }
   };
 
-  const filteredProducts = products?.filter(product => {
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    const matchesSearch = !searchQuery || 
-      product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.sku?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  }) || [];
+  // Filter logic for future use
+  // const filteredProducts = products?.filter(product => {
+  //   const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+  //   const matchesSearch = !searchQuery || 
+  //     product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     product.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     product.sku?.toLowerCase().includes(searchQuery.toLowerCase());
+  //   return matchesCategory && matchesSearch;
+  // }) || [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

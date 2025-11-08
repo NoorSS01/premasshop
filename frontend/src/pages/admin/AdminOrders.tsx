@@ -8,11 +8,11 @@ import axios from 'axios';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 export default function AdminOrders() {
-  const { user, session } = useAuth();
+  const { session } = useAuth();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [autoAssign, setAutoAssign] = useState(true);
 
-  const { data: settings } = useQuery({
+  const { data: _settings } = useQuery({
     queryKey: ['settings'],
     queryFn: async () => {
       const { data, error } = await supabase

@@ -164,7 +164,7 @@ export function useUserInteractionMonitoring() {
     let interactionCount = 0;
     let sessionStartTime = Date.now();
 
-    const trackInteraction = (event: Event) => {
+    const trackInteraction = (_event: Event) => {
       interactionCount++;
       
       // Track engagement metrics
