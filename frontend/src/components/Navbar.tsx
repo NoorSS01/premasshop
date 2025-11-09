@@ -1,20 +1,22 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 
 export default function Navbar() {
   const { user, profile, signOut } = useAuth();
   const { itemCount } = useCart();
-  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
     try {
+      console.log('Navbar: Sign out button clicked');
       await signOut();
-      navigate('/');
+      // Don't navigate here, signOut function handles redirect
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Navbar: Error signing out:', error);
+      // Force redirect even if error
+      window.location.replace('/');
     }
   };
 

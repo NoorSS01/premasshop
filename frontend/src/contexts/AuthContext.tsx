@@ -104,6 +104,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       options: {
         data: {
           full_name: fullName,
+          phone: phone,
+          role: 'customer',
         },
       },
     });
@@ -111,24 +113,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
 
     if (data.user) {
-      // Create user profile
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert({
-          id: data.user.id,
-          email: data.user.email!,
-          full_name: fullName,
-          phone: phone,
-          role: 'customer',
-        });
-
-      if (profileError) {
-        console.error('Error creating profile:', profileError);
-        throw profileError;
+      // Wait a moment for the trigger to create the profile
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Fetch the profile created by the trigger
+      try {
+        const profileData = await fetchProfile(data.user.id);
+        setProfile(profileData);
+      } catch (profileError) {
+        console.error('Error fetching profile after signup:', profileError);
+        // Profile might not be created yet, that's okay
       }
-
-      const profileData = await fetchProfile(data.user.id);
-      setProfile(profileData);
     }
   };
 
@@ -158,30 +153,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
+      console.log('Starting sign out process...');
       setLoading(true);
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Sign out error:', error);
-        throw error;
-      }
       
-      // Clear all state
+      // Clear state immediately
       setUser(null);
       setProfile(null);
       setSession(null);
       
-      // Clear localStorage
-      localStorage.removeItem('supabase.auth.token');
+      // Clear all possible localStorage keys
+      localStorage.clear();
+      sessionStorage.clear();
       
-      // Force page reload to clear any cached data
-      window.location.href = '/';
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      if (error) {
+        console.error('Supabase sign out error:', error);
+      }
+      
+      console.log('Sign out completed, redirecting...');
+      
+      // Force redirect after a short delay
+      setTimeout(() => {
+        window.location.replace('/');
+      }, 100);
+      
     } catch (error) {
       console.error('Error during sign out:', error);
       // Force sign out even if there's an error
       setUser(null);
       setProfile(null);
       setSession(null);
-      window.location.href = '/';
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.replace('/');
     } finally {
       setLoading(false);
     }
