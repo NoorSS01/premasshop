@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { useToast } from './ToastContext';
 
 interface UserProfile {
   id: string;
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
 
   const fetchProfile = async (userId: string) => {
     const { data, error } = await supabase
@@ -94,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (data.user) {
       const profileData = await fetchProfile(data.user.id);
       setProfile(profileData);
+      showToast(`Welcome back, ${profileData?.full_name || 'User'}!`, 'success');
     }
   };
 
@@ -120,9 +123,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const profileData = await fetchProfile(data.user.id);
         setProfile(profileData);
+        showToast(`Welcome to Prema's Shop, ${fullName}!`, 'success');
       } catch (profileError) {
         console.error('Error fetching profile after signup:', profileError);
-        // Profile might not be created yet, that's okay
+        showToast('Account created successfully!', 'success');
       }
     }
   };
@@ -156,6 +160,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('Starting sign out process...');
       setLoading(true);
       
+      // Show sign out notification
+      showToast('Signed out successfully!', 'success');
+      
       // Clear state immediately
       setUser(null);
       setProfile(null);
@@ -176,7 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Force redirect after a short delay
       setTimeout(() => {
         window.location.replace('/');
-      }, 100);
+      }, 1500);
       
     } catch (error) {
       console.error('Error during sign out:', error);

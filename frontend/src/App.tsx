@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -38,11 +39,13 @@ import DevDashboard from './pages/dev/DevDashboard';
 function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <CartProvider>
-          <AppContent />
-        </CartProvider>
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <CartProvider>
+            <AppContent />
+          </CartProvider>
+        </AuthProvider>
+      </ToastProvider>
     </ErrorBoundary>
   );
 }
