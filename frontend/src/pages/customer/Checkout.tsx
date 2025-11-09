@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -21,7 +21,6 @@ export default function Checkout() {
   const { items, total, clearCart } = useCart();
   const { user, session, profile, loading } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'UPI'>('COD');
   const [address, setAddress] = useState<AddressForm>({
     apartment: '',
@@ -33,16 +32,14 @@ export default function Checkout() {
   const [orderLoading, setOrderLoading] = useState(false);
   const [orderError, setOrderError] = useState('');
 
-  // Redirect to login if not authenticated
+  // Checkout page should only be accessible to authenticated users
+  // Authentication check is now handled in Cart page
   useEffect(() => {
     if (!loading && !user) {
-      // Store current location to redirect back after login
-      navigate('/login', { 
-        state: { from: location.pathname },
-        replace: true 
-      });
+      // If somehow an unauthenticated user reaches here, redirect to cart
+      navigate('/cart', { replace: true });
     }
-  }, [loading, user, navigate, location]);
+  }, [loading, user, navigate]);
 
   const { data: hasPayU } = useQuery({
     queryKey: ['payu-config'],
@@ -116,11 +113,9 @@ export default function Checkout() {
     e.preventDefault();
     setOrderError('');
 
+    // User should already be authenticated to reach this page
     if (!user) {
-      navigate('/login', { 
-        state: { from: location.pathname },
-        replace: true 
-      });
+      navigate('/cart', { replace: true });
       return;
     }
 

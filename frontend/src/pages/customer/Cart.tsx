@@ -1,8 +1,24 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function Cart() {
   const { items, updateQuantity, removeItem, total, clearCart } = useCart();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  const handleProceedToCheckout = () => {
+    if (!loading && !user) {
+      // Redirect to login with checkout as the return URL (not cart)
+      navigate('/login', { 
+        state: { from: '/checkout' },
+        replace: true 
+      });
+    } else {
+      // User is authenticated, proceed to checkout
+      navigate('/checkout');
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -175,12 +191,12 @@ export default function Cart() {
               </div>
             </div>
 
-            <Link
-              to="/checkout"
-              className="btn-primary w-full py-4 text-center text-lg font-semibold shadow-lg hover:shadow-xl transition-all block"
+            <button
+              onClick={handleProceedToCheckout}
+              className="btn-primary w-full py-4 text-center text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
             >
               Proceed to Checkout
-            </Link>
+            </button>
 
             <div className="mt-6 pt-6 border-t border-gray-200">
               <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
