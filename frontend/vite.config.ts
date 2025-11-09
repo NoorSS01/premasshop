@@ -13,8 +13,10 @@ export default defineConfig({
     port: 3000,
   },
   build: {
-    outDir: 'dist',
+    outDir: '../dist',  // Build to root dist folder for Hostinger
+    emptyOutDir: true,
     sourcemap: false,
   },
+  base: '/',  // Ensure assets load from root
 });
 

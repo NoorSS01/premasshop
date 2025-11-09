@@ -1,0 +1,12 @@
+# Hostinger Build Configuration for React App
+build:
+  command: npm run build
+  output: dist
+  
+runtime:
+  node: 20
+
+# Environment variables (set these in Hostinger dashboard)
+environment:
+  VITE_SUPABASE_URL: $VITE_SUPABASE_URL
+  VITE_SUPABASE_ANON_KEY: $VITE_SUPABASE_ANON_KEY

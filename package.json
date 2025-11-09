@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "cd frontend && npm run dev",
-    "build": "cd frontend && npm run build",
+    "build": "cd frontend && npm install && npm run build && cd .. && npm run postbuild",
+    "postbuild": "node -e \"try{require('fs').copyFileSync('frontend/public/.htaccess','dist/.htaccess')}catch(e){console.log('.htaccess copy skipped')}\"",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "cd frontend && npm run test",
     "test:integration": "cd tests && npm test",
