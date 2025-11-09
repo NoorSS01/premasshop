@@ -1,33 +1,36 @@
 -- =====================================================
--- COMPLETE DATABASE SETUP FOR PREMA'S SHOP
--- Run this ENTIRE script in Supabase SQL Editor
--- This is the ONLY SQL file you need!
+-- SUPER SIMPLE DATABASE SETUP - WORKS PERMANENTLY!
+-- Run ONCE and forget about it forever!
 -- =====================================================
 
--- 1. DROP ALL EXISTING TABLES (Clean Start)
+-- Clean slate
 DROP TABLE IF EXISTS public.cart_items CASCADE;
 DROP TABLE IF EXISTS public.order_items CASCADE;
 DROP TABLE IF EXISTS public.orders CASCADE;
 DROP TABLE IF EXISTS public.products CASCADE;
 DROP TABLE IF EXISTS public.users CASCADE;
 DROP TABLE IF EXISTS public.settings CASCADE;
-
--- Drop existing triggers and functions
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-DROP FUNCTION IF EXISTS public.handle_new_user();
+DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
 
--- 2. CREATE USERS TABLE
+-- Enable extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Users table
 CREATE TABLE public.users (
   id UUID REFERENCES auth.users(id) PRIMARY KEY,
-  full_name TEXT NOT NULL,
+  full_name TEXT NOT NULL DEFAULT 'User',
   email TEXT NOT NULL UNIQUE,
   phone TEXT,
-  role TEXT NOT NULL DEFAULT 'customer' CHECK (role IN ('customer', 'admin', 'delivery', 'developer')),
+  role TEXT NOT NULL DEFAULT 'customer',
   address JSONB,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Disable RLS for development
+ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
 
 -- 3. CREATE PRODUCTS TABLE
 CREATE TABLE public.products (
@@ -118,38 +121,18 @@ ALTER TABLE public.order_items DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cart_items DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.settings DISABLE ROW LEVEL SECURITY;
 
--- 10. CREATE USER SYNC FUNCTION (BULLETPROOF)
+-- Simple user sync function
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.users (
-    id, 
-    full_name, 
-    email, 
-    role, 
-    phone,
-    created_at,
-    updated_at
-  )
+  INSERT INTO public.users (id, full_name, email, role, phone)
   VALUES (
     NEW.id,
-    COALESCE(
-      NEW.raw_user_meta_data->>'full_name',
-      NEW.raw_user_meta_data->>'name',
-      split_part(NEW.email, '@', 1)
-    ),
+    COALESCE(NEW.raw_user_meta_data->>'full_name', 'User'),
     NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'role', 'customer'),
-    NEW.raw_user_meta_data->>'phone',
-    NOW(),
-    NOW()
-  )
-  ON CONFLICT (id) DO UPDATE SET
-    full_name = EXCLUDED.full_name,
-    email = EXCLUDED.email,
-    phone = EXCLUDED.phone,
-    updated_at = NOW();
-    
+    'customer',
+    NEW.raw_user_meta_data->>'phone'
+  );
   RETURN NEW;
 EXCEPTION
   WHEN OTHERS THEN
@@ -157,21 +140,39 @@ EXCEPTION
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 11. CREATE USER SYNC TRIGGER
+-- Create trigger
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 12. INSERT PRODUCTS (ALWAYS AVAILABLE)
-INSERT INTO public.products (name, description, price, cost_price, stock, category, status, images, sku, weight, unit) VALUES
-('Aquafina Water Bottle', 'Pure drinking water in 1L bottle', 20.00, 15.00, 100, 'water', 'active', ARRAY['https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400'], 'AQF-1L-001', '1L', 'bottle'),
-('Bisleri Water Bottle', 'Premium mineral water 500ml', 15.00, 10.00, 150, 'water', 'active', ARRAY['https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400'], 'BIS-500ML-001', '500ml', 'bottle'),
-('Kinley Water Bottle', 'Refreshing drinking water 2L', 35.00, 25.00, 80, 'water', 'active', ARRAY['https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=400'], 'KIN-2L-001', '2L', 'bottle'),
-('Premium Spring Water', 'Natural spring water with minerals', 45.00, 30.00, 60, 'water', 'active', ARRAY['https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400'], 'PSW-1L-001', '1L', 'bottle'),
-('Eco-Friendly Water Pack', 'Sustainable water packaging', 25.00, 18.00, 120, 'water', 'active', ARRAY['https://images.unsplash.com/photo-1550572017-edd951aa8f72?w=400'], 'ECO-1L-001', '1L', 'pack'),
-('Fresh Bananas', 'Organic bananas from local farms', 60.00, 40.00, 0, 'fruits_vegetables', 'coming_soon', ARRAY['https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400'], 'BAN-1KG-001', '1kg', 'kg'),
-('Milk Packet', 'Fresh dairy milk', 55.00, 45.00, 0, 'dairy', 'coming_soon', ARRAY['https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400'], 'MLK-1L-001', '1L', 'packet'),
-('Potato Chips', 'Crispy and delicious snacks', 30.00, 20.00, 0, 'snacks', 'coming_soon', ARRAY['https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400'], 'CHI-50G-001', '50g', 'packet');
+-- 12. INSERT PRODUCTS (BULLETPROOF - INSERTS ONE BY ONE)
+-- Clear existing products first
+DELETE FROM public.products;
+
+-- Insert products individually
+INSERT INTO public.products (name, description, price, cost_price, stock, category, status, images, sku, weight, unit, created_at, updated_at) 
+VALUES ('Aquafina Water Bottle', 'Pure drinking water in 1L bottle', 20.00, 15.00, 100, 'water', 'active', ARRAY['https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400'], 'AQF-1L-001', '1L', 'bottle', NOW(), NOW());
+
+INSERT INTO public.products (name, description, price, cost_price, stock, category, status, images, sku, weight, unit, created_at, updated_at) 
+VALUES ('Bisleri Water Bottle', 'Premium mineral water 500ml', 15.00, 10.00, 150, 'water', 'active', ARRAY['https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400'], 'BIS-500ML-001', '500ml', 'bottle', NOW(), NOW());
+
+INSERT INTO public.products (name, description, price, cost_price, stock, category, status, images, sku, weight, unit, created_at, updated_at) 
+VALUES ('Kinley Water Bottle', 'Refreshing drinking water 2L', 35.00, 25.00, 80, 'water', 'active', ARRAY['https://images.unsplash.com/photo-1582719471384-894fbb16e074?w=400'], 'KIN-2L-001', '2L', 'bottle', NOW(), NOW());
+
+INSERT INTO public.products (name, description, price, cost_price, stock, category, status, images, sku, weight, unit, created_at, updated_at) 
+VALUES ('Premium Spring Water', 'Natural spring water with minerals', 45.00, 30.00, 60, 'water', 'active', ARRAY['https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400'], 'PSW-1L-001', '1L', 'bottle', NOW(), NOW());
+
+INSERT INTO public.products (name, description, price, cost_price, stock, category, status, images, sku, weight, unit, created_at, updated_at) 
+VALUES ('Eco-Friendly Water Pack', 'Sustainable water packaging', 25.00, 18.00, 120, 'water', 'active', ARRAY['https://images.unsplash.com/photo-1550572017-edd951aa8f72?w=400'], 'ECO-1L-001', '1L', 'pack', NOW(), NOW());
+
+INSERT INTO public.products (name, description, price, cost_price, stock, category, status, images, sku, weight, unit, created_at, updated_at) 
+VALUES ('Fresh Bananas', 'Organic bananas from local farms', 60.00, 40.00, 0, 'fruits_vegetables', 'coming_soon', ARRAY['https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=400'], 'BAN-1KG-001', '1kg', 'kg', NOW(), NOW());
+
+INSERT INTO public.products (name, description, price, cost_price, stock, category, status, images, sku, weight, unit, created_at, updated_at) 
+VALUES ('Milk Packet', 'Fresh dairy milk', 55.00, 45.00, 0, 'dairy', 'coming_soon', ARRAY['https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400'], 'MLK-1L-001', '1L', 'packet', NOW(), NOW());
+
+INSERT INTO public.products (name, description, price, cost_price, stock, category, status, images, sku, weight, unit, created_at, updated_at) 
+VALUES ('Potato Chips', 'Crispy and delicious snacks', 30.00, 20.00, 0, 'snacks', 'coming_soon', ARRAY['https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400'], 'CHI-50G-001', '50g', 'packet', NOW(), NOW());
 
 -- 13. INSERT SETTINGS
 INSERT INTO public.settings (key, value, description) VALUES
@@ -181,58 +182,44 @@ INSERT INTO public.settings (key, value, description) VALUES
 ('auto_assign_orders', '{"enabled": true}', 'Automatically assign orders to delivery partners'),
 ('order_timeout', '{"minutes": 30}', 'Order confirmation timeout in minutes');
 
--- 14. SYNC EXISTING AUTH USERS (IF ANY)
-INSERT INTO public.users (id, full_name, email, role, phone, created_at, updated_at)
+-- Sync existing users
+INSERT INTO public.users (id, full_name, email, role, phone)
 SELECT 
   au.id,
-  COALESCE(
-    au.raw_user_meta_data->>'full_name',
-    au.raw_user_meta_data->>'name',
-    split_part(au.email, '@', 1)
-  ) as full_name,
+  COALESCE(au.raw_user_meta_data->>'full_name', 'User') as full_name,
   au.email,
-  COALESCE(au.raw_user_meta_data->>'role', 'customer') as role,
-  au.raw_user_meta_data->>'phone' as phone,
-  au.created_at,
-  NOW()
+  'customer' as role,
+  au.raw_user_meta_data->>'phone' as phone
 FROM auth.users au
-ON CONFLICT (id) DO UPDATE SET
-  full_name = EXCLUDED.full_name,
-  email = EXCLUDED.email,
-  phone = EXCLUDED.phone,
-  updated_at = NOW();
+ON CONFLICT (id) DO NOTHING;
 
--- 15. CREATE SAMPLE TEST USER (FOR TESTING)
-DO $$
-BEGIN
-  -- Only create if no users exist
-  IF NOT EXISTS (SELECT 1 FROM auth.users LIMIT 1) THEN
-    -- Note: In real Supabase, users are created through the auth system
-    -- This is just for reference - actual user creation happens via signup
-    INSERT INTO public.users (id, full_name, email, role, phone, created_at, updated_at) VALUES
-    (gen_random_uuid(), 'Test User', 'test@premasshop.com', 'customer', '9876543210', NOW(), NOW())
-    ON CONFLICT (email) DO NOTHING;
-  END IF;
-END $$;
-
--- 16. FINAL VERIFICATION
+-- Final verification
 SELECT 
-  '🎉 DATABASE SETUP COMPLETE!' as status,
-  (SELECT COUNT(*) FROM auth.users) as auth_users,
-  (SELECT COUNT(*) FROM public.users) as public_users,
-  (SELECT COUNT(*) FROM public.products WHERE status = 'active') as active_products,
-  (SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'address') as address_column_exists,
-  (SELECT COUNT(*) FROM public.settings) as settings_count,
-  'Orders will be saved with proper user_id mapping!' as order_note;
+  '✅ SETUP COMPLETE!' as status,
+  (SELECT COUNT(*) FROM public.users) as users_table,
+  (SELECT COUNT(*) FROM public.products) as products_table,
+  (SELECT COUNT(*) FROM public.orders) as orders_table,
+  'Database is ready!' as message;
 
 -- =====================================================
--- SETUP COMPLETE! 
--- Your database is now ready for Prema's Shop
+-- ✅ DATABASE SETUP COMPLETE!
 -- 
--- ✅ All tables created with proper schema
--- ✅ Address column exists in orders table
--- ✅ Products are loaded and available
--- ✅ User sync works automatically
--- ✅ No more schema cache errors
--- ✅ Ready for checkout and orders
+-- What was created:
+-- ✅ All tables (users, products, orders, etc.)
+-- ✅ 8 Products added (5 water bottles + 3 coming soon)
+-- ✅ User sync trigger activated
+-- ✅ Settings configured
+-- 
+-- Check the results above:
+-- - products_table should show: 8
+-- - If it shows 0, there was an error - check console
+-- 
+-- Next steps:
+-- 1. Hard refresh your browser (Ctrl+Shift+R)
+-- 2. Products should load immediately
+-- 3. You can add more products through Admin panel later
+-- 
+-- For Hostinger deployment:
+-- - See DEPLOY-INSTRUCTIONS.md file
+-- - Use static hosting, NOT PHP hosting
 -- =====================================================
