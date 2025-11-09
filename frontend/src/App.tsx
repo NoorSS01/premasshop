@@ -19,6 +19,7 @@ import Cart from './pages/customer/Cart';
 import Checkout from './pages/customer/Checkout';
 import OrderHistory from './pages/customer/OrderHistory';
 import OrderTracking from './pages/customer/OrderTracking';
+import Profile from './pages/customer/Profile';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 
@@ -97,6 +98,14 @@ function AppContent() {
                 element={
                   <ProtectedRoute>
                     <OrderTracking />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
                   </ProtectedRoute>
                 }
               />

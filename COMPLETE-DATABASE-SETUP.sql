@@ -202,14 +202,28 @@ ON CONFLICT (id) DO UPDATE SET
   phone = EXCLUDED.phone,
   updated_at = NOW();
 
--- 15. FINAL VERIFICATION
+-- 15. CREATE SAMPLE TEST USER (FOR TESTING)
+DO $$
+BEGIN
+  -- Only create if no users exist
+  IF NOT EXISTS (SELECT 1 FROM auth.users LIMIT 1) THEN
+    -- Note: In real Supabase, users are created through the auth system
+    -- This is just for reference - actual user creation happens via signup
+    INSERT INTO public.users (id, full_name, email, role, phone, created_at, updated_at) VALUES
+    (gen_random_uuid(), 'Test User', 'test@premasshop.com', 'customer', '9876543210', NOW(), NOW())
+    ON CONFLICT (email) DO NOTHING;
+  END IF;
+END $$;
+
+-- 16. FINAL VERIFICATION
 SELECT 
   '🎉 DATABASE SETUP COMPLETE!' as status,
   (SELECT COUNT(*) FROM auth.users) as auth_users,
   (SELECT COUNT(*) FROM public.users) as public_users,
   (SELECT COUNT(*) FROM public.products WHERE status = 'active') as active_products,
   (SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'address') as address_column_exists,
-  (SELECT COUNT(*) FROM public.settings) as settings_count;
+  (SELECT COUNT(*) FROM public.settings) as settings_count,
+  'Orders will be saved with proper user_id mapping!' as order_note;
 
 -- =====================================================
 -- SETUP COMPLETE! 

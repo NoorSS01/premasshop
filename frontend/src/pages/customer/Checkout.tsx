@@ -143,8 +143,17 @@ export default function Checkout() {
         price: item.price,
       }));
 
+      console.log('Creating order for user:', user.id);
+      console.log('Order data:', {
+        user_id: user.id,
+        total_amount: total + 20,
+        payment_method: paymentMethod,
+        address: address,
+        items: orderItems
+      });
+
       const order = await createOrder.mutateAsync({
-        user_id: user.id, // Require authenticated user
+        user_id: user.id, // Ensure user ID is properly set
         items: orderItems,
         total_amount: total + 20,
         payment_method: paymentMethod,
@@ -159,6 +168,8 @@ export default function Checkout() {
         },
         notes: address.note,
       });
+
+      console.log('Order created successfully:', order);
 
       if (paymentMethod === 'UPI') {
         if (!hasPayU) {
@@ -188,7 +199,10 @@ export default function Checkout() {
         document.body.appendChild(form);
         form.submit();
       } else {
+        // COD order completed successfully
         clearCart();
+        console.log('COD order completed, redirecting to order tracking');
+        alert(`Order #${order.id.slice(0, 8).toUpperCase()} placed successfully! You will receive a confirmation shortly.`);
         navigate(`/order/${order.id}`);
       }
     } catch (error: any) {

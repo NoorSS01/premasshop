@@ -83,6 +83,12 @@ export default function Navbar() {
                     >
                       Orders
                     </Link>
+                    <Link
+                      to="/profile"
+                      className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
+                    >
+                      Profile
+                    </Link>
                   </>
                 )}
                 {profile?.role === 'delivery' && (
@@ -181,6 +187,13 @@ export default function Navbar() {
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg font-medium"
                     >
                       Orders
+                    </Link>
+                    <Link
+                      to="/profile"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg font-medium"
+                    >
+                      Profile
                     </Link>
                   </>
                 )}
