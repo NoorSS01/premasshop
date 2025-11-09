@@ -9,6 +9,7 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user, profile, loading } = useAuth();
 
+  // Since loading is always false, this will never show
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -20,15 +21,21 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     );
   }
 
-  if (!user || !profile) {
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && profile.role !== requiredRole) {
-    if (profile.role === 'admin') {
+  // If user exists but profile is still loading, allow access with basic user info
+  // This prevents infinite loading when profile fetch fails
+  if (!profile) {
+    console.warn('Profile not loaded, but user exists - allowing access');
+  }
+
+  if (requiredRole && profile?.role !== requiredRole) {
+    if (profile?.role === 'admin') {
       return <Navigate to="/admin/dashboard" replace />;
     }
-    if (profile.role === 'delivery') {
+    if (profile?.role === 'delivery') {
       return <Navigate to="/delivery/dashboard" replace />;
     }
     return <Navigate to="/" replace />;

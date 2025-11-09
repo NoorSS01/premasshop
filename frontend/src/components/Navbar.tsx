@@ -48,49 +48,46 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-6">
             {user ? (
               <>
-                {profile?.role === 'customer' && (
-                  <>
-                    <Link
-                      to="/catalog"
-                      className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
-                    >
-                      Shop
-                    </Link>
-                    <Link
-                      to="/cart"
-                      className="relative text-gray-700 hover:text-primary-600 font-medium transition-colors"
-                    >
-                      <span className="flex items-center gap-1">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                          />
-                        </svg>
-                        Cart
-                      </span>
-                      {itemCount > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-md">
-                          {itemCount}
-                        </span>
-                      )}
-                    </Link>
-                    <Link
-                      to="/orders"
-                      className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
-                    >
-                      Orders
-                    </Link>
-                    <Link
-                      to="/profile"
-                      className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
-                    >
-                      Profile
-                    </Link>
-                  </>
-                )}
+                {/* Show navigation for all logged-in users, don't wait for profile */}
+                <Link
+                  to="/catalog"
+                  className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
+                >
+                  Shop
+                </Link>
+                <Link
+                  to="/cart"
+                  className="relative text-gray-700 hover:text-primary-600 font-medium transition-colors"
+                >
+                  <span className="flex items-center gap-1">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
+                    </svg>
+                    Cart
+                  </span>
+                  {itemCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-primary-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold shadow-md">
+                      {itemCount}
+                    </span>
+                  )}
+                </Link>
+                <Link
+                  to="/orders"
+                  className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
+                >
+                  Orders
+                </Link>
+                <Link
+                  to="/profile"
+                  className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
+                >
+                  Profile
+                </Link>
                 {profile?.role === 'delivery' && (
                   <Link
                     to="/delivery/dashboard"
@@ -165,38 +162,34 @@ export default function Navbar() {
           <div className="md:hidden py-4 border-t border-gray-200">
             {user ? (
               <div className="space-y-3">
-                {profile?.role === 'customer' && (
-                  <>
-                    <Link
-                      to="/catalog"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg font-medium"
-                    >
-                      Shop
-                    </Link>
-                    <Link
-                      to="/cart"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg font-medium relative"
-                    >
-                      Cart {itemCount > 0 && `(${itemCount})`}
-                    </Link>
-                    <Link
-                      to="/orders"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg font-medium"
-                    >
-                      Orders
-                    </Link>
-                    <Link
-                      to="/profile"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg font-medium"
-                    >
-                      Profile
-                    </Link>
-                  </>
-                )}
+                <Link
+                  to="/catalog"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg font-medium"
+                >
+                  Shop
+                </Link>
+                <Link
+                  to="/cart"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg font-medium"
+                >
+                  Cart {itemCount > 0 && `(${itemCount})`}
+                </Link>
+                <Link
+                  to="/orders"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg font-medium"
+                >
+                  Orders
+                </Link>
+                <Link
+                  to="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg font-medium"
+                >
+                  Profile
+                </Link>
                 {profile?.role === 'delivery' && (
                   <Link
                     to="/delivery/dashboard"

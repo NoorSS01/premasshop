@@ -30,21 +30,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // NEVER LOADING!
 
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    if (error) {
-      console.error('Error fetching profile:', error);
+      if (error) {
+        console.error('Error fetching profile:', error);
+        // If user doesn't exist in public.users table, create a basic profile
+        if (error.code === 'PGRST116') {
+          console.log('User not found in public.users, will be created by trigger');
+          return null;
+        }
+        return null;
+      }
+
+      return data as UserProfile;
+    } catch (error) {
+      console.error('Network error fetching profile:', error);
       return null;
     }
-
-    return data as UserProfile;
   };
 
   const refreshProfile = async () => {
@@ -55,29 +65,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Get initial session
+    // SUPER SIMPLE - Just get session and set user, no waiting
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      // Fetch profile in background if user exists
       if (session?.user) {
-        fetchProfile(session.user.id).then(setProfile);
+        fetchProfile(session.user.id).then(setProfile).catch(() => {
+          console.log('Profile fetch failed, continuing without profile');
+        });
       }
-      setLoading(false);
+    }).catch(() => {
+      console.log('Session fetch failed, continuing without auth');
     });
 
     // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
       if (session?.user) {
         const profileData = await fetchProfile(session.user.id);
         setProfile(profileData);
       } else {
         setProfile(null);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();

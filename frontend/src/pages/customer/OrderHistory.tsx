@@ -9,21 +9,39 @@ export default function OrderHistory() {
   const { user } = useAuth();
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const { data: orders, isLoading } = useQuery({
+  const { data: orders, isLoading, error } = useQuery({
     queryKey: ['orders', user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      console.log('Fetching orders for user:', user?.id);
+      
+      // Set a timeout for the query
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Orders query timeout')), 5000); // 5 second timeout
+      });
+      
+      const queryPromise = supabase
         .from('orders')
         .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
+      
+      const result = await Promise.race([queryPromise, timeoutPromise]) as any;
+      const { data, error } = result;
+      
+      if (error) {
+        console.error('Orders fetch error:', error);
+        throw error;
+      }
+      console.log('Orders fetched:', data?.length || 0);
+      return data || [];
     },
     enabled: !!user,
+    retry: false, // Don't retry to avoid long waits
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
-  const filteredOrders = orders?.filter((order) => {
+  const filteredOrders = orders?.filter((order: any) => {
     if (statusFilter === 'all') return true;
     return order.status === statusFilter;
   });
@@ -92,12 +110,34 @@ export default function OrderHistory() {
     }
   };
 
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center py-16">
+          <div className="text-red-500 mb-4">
+            <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <p className="text-red-600 font-medium">Failed to load orders</p>
+          <p className="text-gray-500 text-sm mt-2">Please check your database setup</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 btn-primary"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center py-16">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 border-t-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading orders...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading your orders...</p>
         </div>
       </div>
     );
@@ -134,7 +174,7 @@ export default function OrderHistory() {
 
       {filteredOrders && filteredOrders.length > 0 ? (
         <div className="space-y-4">
-          {filteredOrders.map((order) => (
+          {filteredOrders.map((order: any) => (
             <Link
               key={order.id}
               to={`/order/${order.id}`}

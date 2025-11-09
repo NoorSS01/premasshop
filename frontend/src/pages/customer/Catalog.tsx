@@ -17,22 +17,41 @@ export default function Catalog() {
     }
   }, [searchParams]);
 
-  const { data: products, isLoading } = useQuery({
+  const { data: products, isLoading, error } = useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      console.log('Fetching products...');
+      
+      // Set a timeout for the query
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Query timeout')), 5000); // 5 second timeout
+      });
+      
+      const queryPromise = supabase
         .from('products')
         .select('*')
         .order('created_at', { ascending: false });
-      if (error) throw error;
-      return data;
+      
+      const result = await Promise.race([queryPromise, timeoutPromise]) as any;
+      const { data, error } = result;
+      
+      if (error) {
+        console.error('Products fetch error:', error);
+        throw error;
+      }
+      console.log('Products fetched:', data?.length || 0);
+      return data || [];
     },
+    retry: false, // Don't retry to avoid long waits
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
   });
 
   const filteredAndSortedProducts = useMemo(() => {
     if (!products) return [];
 
-    let filtered = products.filter((product) => {
+    let filtered = products.filter((product: any) => {
       // Search filter
       const matchesSearch =
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -45,7 +64,7 @@ export default function Catalog() {
     });
 
     // Sort
-    filtered.sort((a, b) => {
+    filtered.sort((a: any, b: any) => {
       switch (sortBy) {
         case 'price_low':
           return a.price - b.price;
@@ -156,14 +175,30 @@ export default function Catalog() {
 
         {/* Products Grid */}
         <div className="pb-6">
-          {isLoading ? (
+          {error ? (
+            <div className="text-center py-16">
+              <div className="text-red-500 mb-4">
+                <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <p className="text-red-600 font-medium">Failed to load products</p>
+              <p className="text-gray-500 text-sm mt-2">Please check your database setup</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="mt-4 btn-primary"
+              >
+                Retry
+              </button>
+            </div>
+          ) : isLoading ? (
             <div className="text-center py-16">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-200 border-t-primary-600 mx-auto"></div>
               <p className="mt-4 text-sm text-gray-600">Loading...</p>
             </div>
           ) : filteredAndSortedProducts.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-              {filteredAndSortedProducts.map((product) => (
+              {filteredAndSortedProducts.map((product: any) => (
                 <Link
                   key={product.id}
                   to={`/product/${product.id}`}
