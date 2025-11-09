@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import PasswordInput from '../../components/PasswordInput';
 
@@ -12,6 +12,10 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const { signUp, signInWithGoogle, signInWithFacebook } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get the page user was trying to access
+  const from = location.state?.from || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +24,7 @@ export default function Signup() {
 
     try {
       await signUp(email, password, fullName, phone);
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (err: any) {
       setError(err.message || 'Failed to sign up');
     } finally {

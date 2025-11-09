@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -19,8 +19,9 @@ interface AddressForm {
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
-  const { user, session, profile } = useAuth();
+  const { user, session, profile, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'UPI'>('COD');
   const [address, setAddress] = useState<AddressForm>({
     apartment: '',
@@ -29,6 +30,19 @@ export default function Checkout() {
     phone: profile?.phone || '',
     note: '',
   });
+  const [orderLoading, setOrderLoading] = useState(false);
+  const [orderError, setOrderError] = useState('');
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      // Store current location to redirect back after login
+      navigate('/login', { 
+        state: { from: location.pathname },
+        replace: true 
+      });
+    }
+  }, [user, loading, navigate, location.pathname]);
 
   const { data: hasPayU } = useQuery({
     queryKey: ['payu-config'],
@@ -39,13 +53,39 @@ export default function Checkout() {
 
   const createOrder = useMutation({
     mutationFn: async (orderData: any) => {
-      const { data, error } = await supabase
+      // First create the order
+      const { data: order, error: orderError } = await supabase
         .from('orders')
-        .insert(orderData)
+        .insert({
+          user_id: orderData.user_id,
+          total_amount: orderData.total_amount,
+          payment_method: orderData.payment_method,
+          payment_status: orderData.payment_status,
+          status: orderData.status,
+          address: orderData.address, // This is the correct field name
+          notes: orderData.notes
+        })
         .select()
         .single();
-      if (error) throw error;
-      return data;
+      
+      if (orderError) throw orderError;
+
+      // Then create order items
+      const orderItems = orderData.items.map((item: any) => ({
+        order_id: order.id,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: item.price,
+        product_name: item.name
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      return order;
     },
   });
 
@@ -74,29 +114,38 @@ export default function Checkout() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setOrderError('');
 
     if (!user) {
-      navigate('/login');
+      navigate('/login', { 
+        state: { from: location.pathname },
+        replace: true 
+      });
       return;
     }
 
     if (items.length === 0) {
-      alert('Your cart is empty');
+      setOrderError('Your cart is empty. Please add items before checkout.');
       return;
     }
 
     if (!address.apartment || !address.block_no || !address.flat_no || !address.phone) {
-      alert('Please fill in all required address fields');
+      setOrderError('Please fill in all required address fields.');
       return;
     }
 
+    if (address.phone.length !== 10) {
+      setOrderError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
+    setOrderLoading(true);
     try {
       const orderItems = items.map((item) => ({
         product_id: item.product_id,
         name: item.name,
-        qty: item.quantity,
+        quantity: item.quantity,
         price: item.price,
-        cost_price: 0,
       }));
 
       const order = await createOrder.mutateAsync({
@@ -113,6 +162,7 @@ export default function Checkout() {
           phone: address.phone,
           note: address.note,
         },
+        notes: address.note,
       });
 
       if (paymentMethod === 'UPI') {
@@ -148,7 +198,9 @@ export default function Checkout() {
       }
     } catch (error: any) {
       console.error('Checkout error:', error);
-      alert(error.message || 'Failed to create order. Please try again.');
+      setOrderError(error.message || 'Failed to create order. Please try again.');
+    } finally {
+      setOrderLoading(false);
     }
   };
 
@@ -187,6 +239,13 @@ export default function Checkout() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+
+      {/* Error Display */}
+      {orderError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+          {orderError}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Form */}
@@ -358,10 +417,10 @@ export default function Checkout() {
 
             <button
               type="submit"
-              disabled={createOrder.isPending || initiatePayment.isPending}
-              className="btn-primary w-full py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              disabled={orderLoading || createOrder.isPending || initiatePayment.isPending}
+              className="btn-primary w-full py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {createOrder.isPending || initiatePayment.isPending ? (
+              {orderLoading || createOrder.isPending || initiatePayment.isPending ? (
                 <span className="flex items-center justify-center gap-2">
                   <svg
                     className="animate-spin h-5 w-5"
