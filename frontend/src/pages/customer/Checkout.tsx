@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -21,7 +21,6 @@ export default function Checkout() {
   const { items, total, clearCart } = useCart();
   const { user, session, profile, loading } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'UPI'>('COD');
   const [address, setAddress] = useState<AddressForm>({
     apartment: '',
@@ -33,16 +32,13 @@ export default function Checkout() {
   const [orderLoading, setOrderLoading] = useState(false);
   const [orderError, setOrderError] = useState('');
 
-  // Redirect to login if not authenticated
+  // Allow guest checkout - no redirect to login
+  const isGuestCheckout = !user;
+
   useEffect(() => {
-    if (!loading && !user) {
-      // Store current location to redirect back after login
-      navigate('/login', { 
-        state: { from: location.pathname },
-        replace: true 
-      });
-    }
-  }, [user, loading, navigate, location.pathname]);
+    // No longer redirect to login - allow guest checkout
+    console.log(isGuestCheckout ? 'Guest checkout mode' : 'Authenticated checkout');
+  }, [loading, user, isGuestCheckout]);
 
   const { data: hasPayU } = useQuery({
     queryKey: ['payu-config'],
@@ -116,12 +112,9 @@ export default function Checkout() {
     e.preventDefault();
     setOrderError('');
 
-    if (!user) {
-      navigate('/login', { 
-        state: { from: location.pathname },
-        replace: true 
-      });
-      return;
+    // Allow guest checkout - no user required
+    if (isGuestCheckout) {
+      console.log('Processing guest checkout...');
     }
 
     if (items.length === 0) {
@@ -149,7 +142,7 @@ export default function Checkout() {
       }));
 
       const order = await createOrder.mutateAsync({
-        user_id: user.id,
+        user_id: user?.id || null, // Allow null for guest checkout
         items: orderItems,
         total_amount: total + 20,
         payment_method: paymentMethod,
@@ -239,6 +232,19 @@ export default function Checkout() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+
+      {/* Guest Checkout Notice */}
+      {isGuestCheckout && (
+        <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-6">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+            <span className="font-medium">Guest Checkout</span>
+          </div>
+          <p className="mt-1 text-sm">You're checking out as a guest. No account required!</p>
+        </div>
+      )}
 
       {/* Error Display */}
       {orderError && (
