@@ -1,3 +1,4 @@
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
@@ -7,6 +8,7 @@ import Footer from './components/Footer';
 import { useGlobalSync } from './hooks/useRealTimeSync';
 import ErrorBoundary from './components/ErrorBoundary';
 import { usePerformanceMonitoring, useUserInteractionMonitoring } from './hooks/usePerformanceMonitoring';
+import { testSupabaseConnection } from './lib/supabase';
 
 // Customer pages
 import Home from './pages/customer/Home';
@@ -52,6 +54,11 @@ function AppContent() {
   // Enable performance monitoring
   usePerformanceMonitoring();
   useUserInteractionMonitoring();
+  
+  // Test Supabase connection on app load
+  React.useEffect(() => {
+    testSupabaseConnection();
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">

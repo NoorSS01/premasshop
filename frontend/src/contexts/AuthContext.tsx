@@ -157,10 +157,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-    setUser(null);
-    setProfile(null);
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+        throw error;
+      }
+      
+      // Clear all state
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      
+      // Clear localStorage
+      localStorage.removeItem('supabase.auth.token');
+      
+      // Force page reload to clear any cached data
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error during sign out:', error);
+      // Force sign out even if there's an error
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      window.location.href = '/';
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
