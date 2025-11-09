@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { useToast } from './ToastContext';
 
 interface UserProfile {
   id: string;
@@ -32,7 +31,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const { showToast } = useToast();
 
   const fetchProfile = async (userId: string) => {
     const { data, error } = await supabase
@@ -96,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (data.user) {
       const profileData = await fetchProfile(data.user.id);
       setProfile(profileData);
-      showToast(`Welcome back, ${profileData?.full_name || 'User'}!`, 'success');
+      console.log(`Welcome back, ${profileData?.full_name || 'User'}!`);
     }
   };
 
@@ -123,10 +121,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const profileData = await fetchProfile(data.user.id);
         setProfile(profileData);
-        showToast(`Welcome to Prema's Shop, ${fullName}!`, 'success');
+        console.log(`Welcome to Prema's Shop, ${fullName}!`);
       } catch (profileError) {
         console.error('Error fetching profile after signup:', profileError);
-        showToast('Account created successfully!', 'success');
+        console.log('Account created successfully!');
       }
     }
   };
@@ -161,7 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       
       // Show sign out notification
-      showToast('Signed out successfully!', 'success');
+      console.log('Signed out successfully!');
       
       // Clear state immediately
       setUser(null);
