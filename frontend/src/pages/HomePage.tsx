@@ -48,34 +48,34 @@ export function HomePage() {
     },
   });
 
-  const handleAddToCart = async (product: Product) => {
+  const handleAddToCart = (product: Product) => {
     if (!user) {
       toast.error('Please sign in to add items to cart');
       return;
     }
     
-    try {
-      // Get current quantity before adding
-      const previousQuantity = getCartItemQuantity(product.id);
-      const newQuantity = previousQuantity + 1;
-      
-      await addToCart.mutateAsync({
-        productId: product.id,
-        quantity: 1
-      });
-      
-      // Show custom toast with the new quantity
-      setToastProduct({ name: product.name, quantity: newQuantity });
-      setShowToast(true);
-      
-      // Auto-hide toast after 5 seconds
-      setTimeout(() => {
-        setShowToast(false);
-      }, 5000);
-      
-    } catch (error) {
-      toast.error('Failed to add to cart');
-    }
+    // Get current quantity before adding
+    const previousQuantity = getCartItemQuantity(product.id);
+    const newQuantity = previousQuantity + 1;
+    
+    addToCart.mutate({
+      productId: product.id,
+      quantity: 1
+    }, {
+      onSuccess: () => {
+        // Show custom toast with the new quantity after successful addition
+        setToastProduct({ name: product.name, quantity: newQuantity });
+        setShowToast(true);
+        
+        // Auto-hide toast after 5 seconds
+        setTimeout(() => {
+          setShowToast(false);
+        }, 5000);
+      },
+      onError: () => {
+        toast.error('Failed to add to cart');
+      }
+    });
   };
 
   const getCartItemQuantity = (productId: string) => {
