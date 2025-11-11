@@ -9,7 +9,26 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .animate-in {
+        .line-clamp-1 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+        }
+        .line-clamp-2 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .toast-slide-in {
             animation: slideIn 0.3s ease-out;
         }
         @keyframes slideIn {
@@ -22,161 +41,171 @@
                 opacity: 1;
             }
         }
-        .btn-primary {
-            background-color: rgb(22 163 74);
-            color: white;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.2s;
-            cursor: pointer;
-            border: none;
-        }
-        .btn-primary:hover {
-            background-color: rgb(21 128 61);
-        }
-        .btn-secondary {
-            background-color: rgb(243 244 246);
-            color: rgb(55 65 81);
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.2s;
-            cursor: pointer;
-            border: none;
-        }
-        .btn-secondary:hover {
-            background-color: rgb(229 231 235);
-        }
-        .hidden {
-            display: none !important;
-        }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-white">
     <div id="app">
-            <!-- Header -->
-            <header class="bg-green-600 text-white sticky top-0 z-40">
-                <div class="px-4 py-3">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                                <span class="text-white font-bold text-lg">P</span>
-                            </div>
-                            <div>
-                                <p class="text-lg font-bold">Premas Shop</p>
-                            </div>
+        <!-- Header -->
+        <header class="bg-green-600 text-white sticky top-0 z-40">
+            <div class="px-4 py-3">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-lg">P</span>
                         </div>
-                        <div class="relative">
-                            <button id="cart-btn" class="relative p-2 text-white hover:bg-white/10 rounded-lg transition-colors">
-                                <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                                <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
-                            </button>
+                        <div>
+                            <p class="text-lg font-bold">Premas Shop</p>
                         </div>
                     </div>
-                    
-                    <!-- Search -->
                     <div class="relative">
-                        <input type="text" id="search-input" placeholder="Search for products..." class="w-full px-4 py-2 rounded-lg text-gray-900 placeholder-gray-500 pr-10">
-                        <i data-lucide="search" class="absolute right-3 top-2.5 w-5 h-5 text-gray-400"></i>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Hero Section -->
-            <section class="bg-gradient-to-b from-green-600 to-green-500 text-white px-4 py-8">
-                <div class="max-w-md mx-auto text-center">
-                    <h1 class="text-2xl font-bold mb-2">Fresh Essentials, Fast Delivery</h1>
-                    <p class="text-green-100 mb-6">Get water, groceries, and daily essentials delivered to your doorstep in minutes!</p>
-                    <button class="bg-white text-green-600 px-6 py-2 rounded-lg font-semibold hover:bg-green-50 transition-colors">
-                        Start Shopping
-                    </button>
-                </div>
-            </section>
-
-            <!-- Categories -->
-            <section class="px-4 py-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-4">Shop by Category</h2>
-                <div class="grid grid-cols-4 gap-4">
-                    <div class="text-center category-btn cursor-pointer" data-category="water">
-                        <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2 hover:bg-blue-200 transition-colors">
-                            <i data-lucide="package" class="w-8 h-8 text-blue-600"></i>
-                        </div>
-                        <p class="text-sm text-gray-700">Water</p>
-                    </div>
-                    <div class="text-center category-btn cursor-pointer" data-category="groceries">
-                        <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2 hover:bg-orange-200 transition-colors">
-                            <i data-lucide="package" class="w-8 h-8 text-orange-600"></i>
-                        </div>
-                        <p class="text-sm text-gray-700">Groceries</p>
-                    </div>
-                    <div class="text-center category-btn cursor-pointer" data-category="dairy">
-                        <div class="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2 hover:bg-purple-200 transition-colors">
-                            <i data-lucide="package" class="w-8 h-8 text-purple-600"></i>
-                        </div>
-                        <p class="text-sm text-gray-700">Dairy</p>
-                    </div>
-                    <div class="text-center category-btn cursor-pointer" data-category="snacks">
-                        <div class="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-2 hover:bg-red-200 transition-colors">
-                            <i data-lucide="package" class="w-8 h-8 text-red-600"></i>
-                        </div>
-                        <p class="text-sm text-gray-700">Snacks</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Products -->
-            <section class="px-4 py-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-4">Popular Products</h2>
-                <div id="products-grid" class="grid grid-cols-2 gap-4">
-                    <!-- Products will be loaded here -->
-                </div>
-            </section>
-
-            <!-- Bottom Navigation -->
-            <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
-                <div class="grid grid-cols-4 py-2">
-                    <button class="nav-btn flex flex-col items-center py-2 text-green-600" data-page="home">
-                        <i data-lucide="home" class="w-5 h-5 mb-1"></i>
-                        <span class="text-xs">Home</span>
-                    </button>
-                    <button class="nav-btn flex flex-col items-center py-2 text-gray-400" data-page="orders">
-                        <i data-lucide="shopping-bag" class="w-5 h-5 mb-1"></i>
-                        <span class="text-xs">Orders</span>
-                    </button>
-                    <button class="nav-btn flex flex-col items-center py-2 text-gray-400" data-page="profile">
-                        <i data-lucide="user" class="w-5 h-5 mb-1"></i>
-                        <span class="text-xs">Profile</span>
-                    </button>
-                    <button class="nav-btn flex flex-col items-center py-2 text-gray-400" data-page="more">
-                        <i data-lucide="menu" class="w-5 h-5 mb-1"></i>
-                        <span class="text-xs">More</span>
-                    </button>
-                </div>
-            </nav>
-        </div>
-
-        <!-- Cart Modal -->
-        <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
-            <div class="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-96 overflow-y-auto">
-                <div class="p-4">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-bold">Your Cart</h3>
-                        <button id="close-cart" class="text-gray-400 hover:text-gray-600">
-                            <i data-lucide="x" class="w-6 h-6"></i>
+                        <button
+                            id="cart-btn"
+                            class="relative p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+                        >
+                            <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                            <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
                         </button>
                     </div>
-                    <div id="cart-items" class="space-y-3 mb-4">
-                        <!-- Cart items will be shown here -->
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                    <input
+                        type="text"
+                        id="search-input"
+                        placeholder="Search for products..."
+                        class="w-full pl-10 pr-4 py-2 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                    />
+                </div>
+            </div>
+        </header>
+
+        <!-- Promotional Banner -->
+        <section class="px-4 py-4">
+            <div class="bg-gradient-to-r from-orange-400 to-red-500 rounded-lg p-4 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold mb-1">30% OFF</h2>
+                        <p class="text-sm opacity-90">On your first order</p>
+                        <p class="text-xs opacity-75 mt-1">Valid till 31st Dec</p>
                     </div>
-                    <div class="border-t pt-4">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="font-semibold">Total:</span>
-                            <span id="cart-total" class="text-xl font-bold text-green-600">₹0</span>
-                        </div>
-                        <button class="w-full btn-primary">Proceed to Checkout</button>
+                    <div class="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2">
+                        <i data-lucide="package" class="w-6 h-6 text-white"></i>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- Categories -->
+        <section class="px-4 py-2">
+            <div class="flex space-x-4 overflow-x-auto pb-2">
+                <button class="category-btn flex flex-col items-center space-y-2 min-w-fit" data-category="all">
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="grid-3x3" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <span class="text-xs text-gray-700 font-medium">All</span>
+                </button>
+                <button class="category-btn flex flex-col items-center space-y-2 min-w-fit" data-category="fruits">
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="package" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <span class="text-xs text-gray-700 font-medium">Fruits</span>
+                </button>
+                <button class="category-btn flex flex-col items-center space-y-2 min-w-fit" data-category="vegetables">
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="package" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <span class="text-xs text-gray-700 font-medium">Vegetables</span>
+                </button>
+                <button class="category-btn flex flex-col items-center space-y-2 min-w-fit" data-category="dairy">
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="package" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <span class="text-xs text-gray-700 font-medium">Dairy</span>
+                </button>
+                <button class="category-btn flex flex-col items-center space-y-2 min-w-fit" data-category="snacks">
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="package" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <span class="text-xs text-gray-700 font-medium">Snacks</span>
+                </button>
+                <button class="category-btn flex flex-col items-center space-y-2 min-w-fit" data-category="beverages">
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="package" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <span class="text-xs text-gray-700 font-medium">Beverages</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Products Grid -->
+        <section class="px-4 py-4 pb-24">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-bold text-gray-900">All Products</h2>
+                <p class="text-sm text-gray-600"><span id="products-count">0</span> items</p>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="loading-state" class="grid grid-cols-2 gap-4">
+                <div class="bg-white rounded-lg border border-gray-200 p-3 animate-pulse">
+                    <div class="aspect-square bg-gray-100 rounded-lg mb-3"></div>
+                    <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+                </div>
+                <div class="bg-white rounded-lg border border-gray-200 p-3 animate-pulse">
+                    <div class="aspect-square bg-gray-100 rounded-lg mb-3"></div>
+                    <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+                </div>
+                <div class="bg-white rounded-lg border border-gray-200 p-3 animate-pulse">
+                    <div class="aspect-square bg-gray-100 rounded-lg mb-3"></div>
+                    <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+                </div>
+                <div class="bg-white rounded-lg border border-gray-200 p-3 animate-pulse">
+                    <div class="aspect-square bg-gray-100 rounded-lg mb-3"></div>
+                    <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="text-center py-12 hidden">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="package" class="w-8 h-8 text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">No products found</h3>
+                <p class="text-sm text-gray-600">Try adjusting your search</p>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="products-grid" class="grid grid-cols-2 gap-4 hidden">
+                <!-- Products will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Custom View Cart Toast -->
+        <div id="view-cart-toast" class="fixed top-20 right-4 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50 hidden toast-slide-in">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="shopping-cart" class="w-5 h-5 text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900">Added to cart!</p>
+                        <p class="text-sm text-gray-600"><span id="toast-product-name">Product</span> (<span id="toast-quantity">1</span>)</p>
+                    </div>
+                </div>
+                <button id="close-toast" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="mt-3">
+                <button class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded-lg text-sm flex items-center justify-center">
+                    <i data-lucide="shopping-cart" class="w-4 h-4 mr-2"></i>
+                    View Cart
+                </button>
             </div>
         </div>
     </div>
@@ -194,36 +223,41 @@
         let cart = [];
         let products = [];
         let currentUser = null;
-
-        // Sample products data
-        const sampleProducts = [
-            { id: 1, name: 'Mineral Water', description: '20L Bottle', price: 40, category: 'water' },
-            { id: 2, name: 'Fresh Milk', description: '1L Pack', price: 60, category: 'dairy' },
-            { id: 3, name: 'Bread', description: 'Fresh White Bread', price: 35, category: 'groceries' },
-            { id: 4, name: 'Eggs', description: 'Pack of 12', price: 80, category: 'dairy' },
-            { id: 5, name: 'Rice', description: '5kg Bag', price: 250, category: 'groceries' },
-            { id: 6, name: 'Chips', description: 'Potato Chips', price: 20, category: 'snacks' }
-        ];
+        let isLoading = true;
 
         // Initialize app
         function initApp() {
             console.log('Initializing Premas Shop...');
             
-            // Initialize Lucide icons immediately
+            // Initialize Lucide icons
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
             
-            // Setup event listeners immediately
+            // Setup event listeners
             setupEventListeners();
             
-            // Load products immediately
-            loadProducts();
-            
-            // Check authentication immediately
-            checkAuth();
-            
-            console.log('App initialized successfully!');
+            // Load products and check auth
+            loadApp();
+        }
+
+        async function loadApp() {
+            try {
+                // Check authentication
+                await checkAuth();
+                
+                // Load products
+                await loadProducts();
+                
+                // Hide loading state
+                isLoading = false;
+                updateUI();
+                
+            } catch (error) {
+                console.error('Failed to load app:', error);
+                isLoading = false;
+                updateUI();
+            }
         }
 
         async function checkAuth() {
@@ -266,6 +300,7 @@
                     name: item.products.name,
                     description: item.products.description,
                     price: item.products.price,
+                    cost_price: item.products.cost_price,
                     quantity: item.quantity
                 })) || [];
                 
@@ -284,37 +319,114 @@
                     .order('name');
                 
                 if (error) throw error;
-                products = data || sampleProducts;
+                products = data || [];
+                renderProducts(products);
             } catch (error) {
-                console.error('Failed to load products from Supabase:', error);
-                products = sampleProducts;
+                console.error('Failed to load products:', error);
+                products = [];
+                renderProducts(products);
             }
-            renderProducts(products);
+        }
+
+        function updateUI() {
+            const loadingState = document.getElementById('loading-state');
+            const emptyState = document.getElementById('empty-state');
+            const productsGrid = document.getElementById('products-grid');
+            
+            if (isLoading) {
+                loadingState.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+                productsGrid.classList.add('hidden');
+            } else if (products.length === 0) {
+                loadingState.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                productsGrid.classList.add('hidden');
+            } else {
+                loadingState.classList.add('hidden');
+                emptyState.classList.add('hidden');
+                productsGrid.classList.remove('hidden');
+            }
+            
+            // Update products count
+            document.getElementById('products-count').textContent = products.length;
         }
 
         function renderProducts(productsToRender) {
             const grid = document.getElementById('products-grid');
             if (!grid) return;
             
-            grid.innerHTML = productsToRender.map(product => `
-                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col h-full">
-                    <div class="aspect-square bg-gray-50 rounded-t-lg flex items-center justify-center">
-                        <i data-lucide="package" class="w-12 h-12 text-gray-400"></i>
-                    </div>
-                    <div class="p-3 flex-1 flex flex-col">
-                        <div class="flex-1">
-                            <h3 class="font-medium text-gray-900 mb-1">${product.name}</h3>
-                            <p class="text-sm text-gray-500 mb-2">${product.description}</p>
+            grid.innerHTML = productsToRender.map(product => {
+                const quantity = getCartItemQuantity(product.id);
+                const hasDiscount = product.cost_price && product.cost_price > product.price;
+                const discountPercentage = hasDiscount ? Math.round(((product.cost_price - product.price) / product.cost_price) * 100) : 0;
+                
+                return `
+                    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col h-full">
+                        <div class="relative">
+                            <div class="aspect-square bg-gray-50 flex items-center justify-center">
+                                <i data-lucide="package" class="w-12 h-12 text-gray-400"></i>
+                            </div>
+                            ${hasDiscount ? `
+                                <div class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                    ${discountPercentage}% OFF
+                                </div>
+                            ` : ''}
                         </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-base font-bold text-gray-900">₹${product.price}</span>
-                            <button class="add-to-cart-btn btn-primary text-sm px-3 py-1" onclick="addToCart(${product.id}, '${product.name}', ${product.price})">
-                                Add
-                            </button>
+                        
+                        <div class="p-3 flex flex-col flex-1">
+                            <div class="flex-1">
+                                <h3 class="font-medium text-gray-900 mb-1 text-sm line-clamp-2">
+                                    ${product.name}
+                                </h3>
+                                <p class="text-xs text-gray-500 mb-2 line-clamp-1">${product.description || ''}</p>
+                            </div>
+                            
+                            <div class="flex items-center justify-between mb-2">
+                                <div>
+                                    <span class="text-base font-bold text-gray-900">
+                                        ₹${product.price}
+                                    </span>
+                                    ${hasDiscount ? `
+                                        <span class="text-xs text-gray-500 line-through ml-1">
+                                            ₹${product.cost_price}
+                                        </span>
+                                    ` : ''}
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-current"></i>
+                                    <span class="text-xs text-gray-600">4.5</span>
+                                </div>
+                            </div>
+
+                            ${quantity > 0 ? `
+                                <div class="flex items-center justify-between bg-green-50 rounded-lg p-1">
+                                    <button 
+                                        class="text-green-600 hover:bg-green-100 h-7 w-7 p-0 rounded flex items-center justify-center"
+                                        onclick="updateQuantity('${product.id}', -1)"
+                                    >
+                                        <i data-lucide="minus" class="w-3 h-3"></i>
+                                    </button>
+                                    <span class="font-medium text-gray-900 text-sm">${quantity}</span>
+                                    <button 
+                                        class="text-green-600 hover:bg-green-100 h-7 w-7 p-0 rounded flex items-center justify-center"
+                                        onclick="updateQuantity('${product.id}', 1)"
+                                    >
+                                        <i data-lucide="plus" class="w-3 h-3"></i>
+                                    </button>
+                                </div>
+                            ` : `
+                                <button
+                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded-lg text-sm flex items-center justify-center"
+                                    onclick="handleAddToCart('${product.id}', '${product.name}', ${product.price})"
+                                >
+                                    <i data-lucide="plus" class="w-3 h-3 mr-1"></i>
+                                    Add
+                                </button>
+                            `}
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
             
             // Re-initialize icons
             if (typeof lucide !== 'undefined') {
@@ -322,71 +434,12 @@
             }
         }
 
-        function setupEventListeners() {
-            // Cart button
-            const cartBtn = document.getElementById('cart-btn');
-            if (cartBtn) cartBtn.addEventListener('click', showCart);
-            
-            // Close cart
-            const closeCart = document.getElementById('close-cart');
-            if (closeCart) closeCart.addEventListener('click', hideCart);
-            
-            // Search
-            const searchInput = document.getElementById('search-input');
-            if (searchInput) {
-                searchInput.addEventListener('input', function(e) {
-                    const query = e.target.value.toLowerCase();
-                    const filtered = products.filter(p => 
-                        p.name.toLowerCase().includes(query) || 
-                        p.description.toLowerCase().includes(query)
-                    );
-                    renderProducts(filtered);
-                });
-            }
-            
-            // Categories
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const category = this.dataset.category;
-                    const filtered = category === 'all' ? products : products.filter(p => p.category === category);
-                    renderProducts(filtered);
-                });
-            });
-            
-            // Navigation
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    // Remove active state from all
-                    document.querySelectorAll('.nav-btn').forEach(b => {
-                        b.classList.remove('text-green-600');
-                        b.classList.add('text-gray-400');
-                    });
-                    // Add active state to clicked
-                    this.classList.remove('text-gray-400');
-                    this.classList.add('text-green-600');
-                    
-                    const page = this.dataset.page;
-                    
-                    if (page === 'profile') {
-                        if (currentUser) {
-                            showToast(`Welcome back, ${currentUser.email}`);
-                        } else {
-                            await signIn();
-                        }
-                    } else if (page === 'orders') {
-                        if (currentUser) {
-                            showToast('Your orders will appear here');
-                        } else {
-                            showToast('Please sign in to view orders');
-                        }
-                    } else {
-                        showToast(`${page.charAt(0).toUpperCase() + page.slice(1)} page coming soon!`);
-                    }
-                });
-            });
+        function getCartItemQuantity(productId) {
+            const item = cart.find(item => item.id === productId);
+            return item?.quantity || 0;
         }
 
-        async function addToCart(productId, productName, productPrice) {
+        async function handleAddToCart(productId, productName, productPrice) {
             if (!currentUser) {
                 showToast('Please sign in to add items to cart');
                 return;
@@ -406,87 +459,26 @@
                 if (error) throw error;
                 
                 await loadUserCart();
-                showToast(`${productName} added to cart!`);
+                
+                const newQuantity = getCartItemQuantity(productId);
+                showViewCartToast(productName, newQuantity);
             } catch (error) {
                 console.error('Failed to add to cart:', error);
                 showToast('Failed to add to cart');
             }
         }
 
-        function updateCartCount() {
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const cartCount = document.getElementById('cart-count');
-            if (cartCount) cartCount.textContent = totalItems;
-        }
-
-        function showCart() {
-            renderCartItems();
-            const cartModal = document.getElementById('cart-modal');
-            if (cartModal) cartModal.classList.remove('hidden');
-        }
-
-        function hideCart() {
-            const cartModal = document.getElementById('cart-modal');
-            if (cartModal) cartModal.classList.add('hidden');
-        }
-
-        function renderCartItems() {
-            const cartItemsDiv = document.getElementById('cart-items');
-            const cartTotal = document.getElementById('cart-total');
-            
-            if (!cartItemsDiv || !cartTotal) return;
-            
-            if (cart.length === 0) {
-                cartItemsDiv.innerHTML = '<p class="text-gray-500 text-center py-4">Your cart is empty</p>';
-                cartTotal.textContent = '₹0';
-                return;
-            }
-            
-            cartItemsDiv.innerHTML = cart.map(item => `
-                <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                    <div class="flex-1">
-                        <h4 class="font-medium text-gray-900">${item.name}</h4>
-                        <p class="text-sm text-gray-500">₹${item.price} x ${item.quantity}</p>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <button class="quantity-btn w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center" onclick="updateQuantity(${item.id}, 'decrease')">
-                            <i data-lucide="minus" class="w-3 h-3"></i>
-                        </button>
-                        <span class="font-medium w-8 text-center">${item.quantity}</span>
-                        <button class="quantity-btn w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center" onclick="updateQuantity(${item.id}, 'increase')">
-                            <i data-lucide="plus" class="w-3 h-3"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-            
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            cartTotal.textContent = `₹${total}`;
-            
-            // Re-initialize icons
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            }
-        }
-
-        async function updateQuantity(productId, action) {
+        async function updateQuantity(productId, change) {
             const item = cart.find(item => item.id === productId);
             if (!item) return;
             
-            if (action === 'increase') {
-                item.quantity += 1;
-            } else if (action === 'decrease') {
-                item.quantity -= 1;
-                if (item.quantity === 0) {
-                    cart = cart.filter(item => item.id !== productId);
-                }
-            }
+            const newQuantity = item.quantity + change;
             
             try {
-                if (item.quantity > 0) {
+                if (newQuantity > 0) {
                     await supabaseClient
                         .from('cart_items')
-                        .update({ quantity: item.quantity })
+                        .update({ quantity: newQuantity })
                         .eq('user_id', currentUser.id)
                         .eq('product_id', productId);
                 } else {
@@ -497,35 +489,52 @@
                         .eq('product_id', productId);
                 }
                 
-                updateCartCount();
-                renderCartItems();
+                await loadUserCart();
+                renderProducts(products);
             } catch (error) {
                 console.error('Failed to update quantity:', error);
             }
         }
 
-        function showToast(message) {
-            // Remove existing toast
-            const existingToast = document.getElementById('toast-notification');
-            if (existingToast) {
-                existingToast.remove();
+        function updateCartCount() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const cartCount = document.getElementById('cart-count');
+            if (cartCount) {
+                if (totalItems > 0) {
+                    cartCount.textContent = totalItems;
+                    cartCount.classList.remove('hidden');
+                } else {
+                    cartCount.classList.add('hidden');
+                }
             }
+        }
+
+        function showViewCartToast(productName, quantity) {
+            const toast = document.getElementById('view-cart-toast');
+            const productNameEl = document.getElementById('toast-product-name');
+            const quantityEl = document.getElementById('toast-quantity');
             
-            // Create new toast
+            if (productNameEl) productNameEl.textContent = productName;
+            if (quantityEl) quantityEl.textContent = quantity;
+            
+            toast.classList.remove('hidden');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 5000);
+        }
+
+        function showToast(message) {
+            // Simple toast implementation
             const toast = document.createElement('div');
-            toast.id = 'toast-notification';
-            toast.className = 'fixed top-4 right-4 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50 animate-in';
+            toast.className = 'fixed top-20 right-4 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50 toast-slide-in';
             toast.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                            <i data-lucide="shopping-cart" class="w-4 h-4 text-green-600"></i>
-                        </div>
-                        <p class="text-sm text-gray-900">${message}</p>
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="shopping-cart" class="w-4 h-4 text-green-600"></i>
                     </div>
-                    <button class="text-gray-400 hover:text-gray-600" onclick="document.getElementById('toast-notification').remove()">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </button>
+                    <p class="text-sm text-gray-900">${message}</p>
                 </div>
             `;
             
@@ -536,38 +545,60 @@
                 lucide.createIcons();
             }
             
-            // Auto-hide after 5 seconds
+            // Auto-hide after 3 seconds
             setTimeout(() => {
-                if (document.getElementById('toast-notification')) {
-                    toast.remove();
-                }
-            }, 5000);
+                toast.remove();
+            }, 3000);
         }
 
-        async function signIn() {
-            const email = prompt('Enter your email to sign in:');
-            if (!email) return;
+        function setupEventListeners() {
+            // Cart button
+            const cartBtn = document.getElementById('cart-btn');
+            if (cartBtn) {
+                cartBtn.addEventListener('click', () => {
+                    showToast('Cart page coming soon!');
+                });
+            }
             
-            try {
-                const { error } = await supabaseClient.auth.signInWithOtp({
-                    email: email,
-                    options: {
-                        emailRedirectTo: window.location.href
+            // Close toast
+            const closeToast = document.getElementById('close-toast');
+            if (closeToast) {
+                closeToast.addEventListener('click', () => {
+                    document.getElementById('view-cart-toast').classList.add('hidden');
+                });
+            }
+            
+            // Search
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const query = e.target.value.toLowerCase();
+                    const filtered = products.filter(p => 
+                        p.name.toLowerCase().includes(query) || 
+                        (p.description && p.description.toLowerCase().includes(query))
+                    );
+                    renderProducts(filtered);
+                });
+            }
+            
+            // Categories
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const category = this.dataset.category;
+                    if (category === 'all') {
+                        renderProducts(products);
+                    } else {
+                        const filtered = products.filter(p => p.category === category);
+                        renderProducts(filtered);
                     }
                 });
-                
-                if (error) throw error;
-                showToast('Check your email for the sign-in link!');
-            } catch (error) {
-                console.error('Sign in error:', error);
-                showToast('Failed to sign in. Please try again.');
-            }
+            });
         }
 
         // Start the app immediately
         initApp();
 
-        console.log('Premas Shop scripts loaded!');
+        console.log('Premas Shop loaded!');
     </script>
 </body>
 </html>
