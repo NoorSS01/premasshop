@@ -7,7 +7,7 @@
     <meta name="description" content="Get your daily essentials delivered to your doorstep in minutes. Fresh water, groceries, and more.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> -->
     <style>
         .animate-in {
             animation: slideIn 0.3s ease-out;
@@ -191,13 +191,13 @@
     </div>
 
     <script>
-        // Supabase configuration
-        const SUPABASE_URL = 'https://kpyvndiqvwushuhwxvon.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtweXZuZGlxdnd1c2h1aHd4dm9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1ODU0OTIsImV4cCI6MjA3ODE2MTQ5Mn0.TqoLz-r-XZpRvyWhBXyKKQjTrpSGX4bGwQHIM3kGTMs';
+        // Supabase configuration (commented out to prevent loading issues)
+        // const SUPABASE_URL = 'https://kpyvndiqvwushuhwxvon.supabase.co';
+        // const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtweXZuZGlxdnd1c2h1aHd4dm9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1ODU0OTIsImV4cCI6MjA3ODE2MTQ5Mn0.TqoLz-r-XZpRvyWhBXyKKQjTrpSGX4bGwQHIM3kGTMs';
         
-        // Initialize Supabase
-        const { createClient } = supabase;
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Initialize Supabase (commented out)
+        // const { createClient } = supabase;
+        // const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // App State
         let cart = [];
