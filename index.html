@@ -218,6 +218,28 @@
                 </button>
             </div>
         </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+            <div class="grid grid-cols-4 py-2">
+                <button class="nav-btn flex flex-col items-center py-2 text-green-600" data-page="home">
+                    <i data-lucide="home" class="w-5 h-5 mb-1"></i>
+                    <span class="text-xs">Home</span>
+                </button>
+                <button class="nav-btn flex flex-col items-center py-2 text-gray-400" data-page="orders">
+                    <i data-lucide="shopping-bag" class="w-5 h-5 mb-1"></i>
+                    <span class="text-xs">Orders</span>
+                </button>
+                <button class="nav-btn flex flex-col items-center py-2 text-gray-400" data-page="profile">
+                    <i data-lucide="user" class="w-5 h-5 mb-1"></i>
+                    <span class="text-xs">Profile</span>
+                </button>
+                <button class="nav-btn flex flex-col items-center py-2 text-gray-400" data-page="more">
+                    <i data-lucide="menu" class="w-5 h-5 mb-1"></i>
+                    <span class="text-xs">More</span>
+                </button>
+            </div>
+        </nav>
     </div>
 
     <script>
@@ -603,6 +625,58 @@
                     }
                 });
             });
+            
+            // Navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    // Remove active state from all
+                    document.querySelectorAll('.nav-btn').forEach(b => {
+                        b.classList.remove('text-green-600');
+                        b.classList.add('text-gray-400');
+                    });
+                    // Add active state to clicked
+                    this.classList.remove('text-gray-400');
+                    this.classList.add('text-green-600');
+                    
+                    const page = this.dataset.page;
+                    
+                    if (page === 'profile') {
+                        if (currentUser) {
+                            showToast(`Welcome back, ${currentUser.email}`);
+                        } else {
+                            await signIn();
+                        }
+                    } else if (page === 'orders') {
+                        if (currentUser) {
+                            showToast('Your orders will appear here');
+                        } else {
+                            showToast('Please sign in to view orders');
+                        }
+                    } else {
+                        showToast(`${page.charAt(0).toUpperCase() + page.slice(1)} page coming soon!`);
+                    }
+                });
+            });
+        }
+
+        async function signIn() {
+            const email = prompt('Enter your email to sign in:');
+            if (!email) return;
+            
+            try {
+                const { error } = await supabaseClient.auth.signInWithOtp({
+                    email: email,
+                    options: {
+                        emailRedirectTo: window.location.href
+                    }
+                });
+                
+                if (error) throw error;
+                showToast('Check your email for the sign-in link!');
+            } catch (error) {
+                console.error('Sign in error:', error);
+                showToast('Failed to sign in. Please try again.');
+            }
         }
 
         // Start the app immediately
