@@ -1,156 +1,100 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { ToastProvider } from './contexts/ToastContext';
-import { AuthProvider } from './contexts/AuthContext';
-import { CartProvider } from './contexts/CartContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import { useGlobalSync } from './hooks/useRealTimeSync';
-import ErrorBoundary from './components/ErrorBoundary';
-import { usePerformanceMonitoring, useUserInteractionMonitoring } from './hooks/usePerformanceMonitoring';
-import { testSupabaseConnection } from './lib/supabase';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
+import { Layout } from './components/Layout';
+import { HomePage } from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { CartPage } from './pages/CartPage';
+import { OrdersPage } from './pages/OrdersPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { AdminDashboard } from './pages/AdminDashboard';
+import { useAuth } from './hooks/useAuth';
 
-// Customer pages
-import Home from './pages/customer/Home';
-import Catalog from './pages/customer/Catalog';
-import ProductPage from './pages/customer/ProductPage';
-import Cart from './pages/customer/Cart';
-import Checkout from './pages/customer/Checkout';
-import OrderHistory from './pages/customer/OrderHistory';
-import OrderTracking from './pages/customer/OrderTracking';
-import Profile from './pages/customer/Profile';
-import Login from './pages/auth/Login';
-import Signup from './pages/auth/Signup';
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
-// Delivery partner pages
-import DeliverySignup from './pages/delivery/DeliverySignup';
-import DeliveryDashboard from './pages/delivery/DeliveryDashboard';
+function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
+  const { user, profile, loading } = useAuth();
 
-// Admin pages
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminProducts from './pages/admin/AdminProducts';
-import AdminOrders from './pages/admin/AdminOrders';
-import AdminDeliveryPartners from './pages/admin/AdminDeliveryPartners';
-import AdminMaliciousActivity from './pages/admin/AdminMaliciousActivity';
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      </div>
+    );
+  }
 
-// Developer pages
-import DevDashboard from './pages/dev/DevDashboard';
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (adminOnly && profile?.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+}
 
 function App() {
   return (
-    <ErrorBoundary>
-      <ToastProvider>
-        <AuthProvider>
-          <CartProvider>
-            <AppContent />
-          </CartProvider>
-        </AuthProvider>
-      </ToastProvider>
-    </ErrorBoundary>
-  );
-}
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            
+            <Route
+              path="/cart"
+              element={
+                <ProtectedRoute>
+                  <CartPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <OrdersPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-function AppContent() {
-  // Enable global real-time synchronization
-  useGlobalSync();
-  
-  // Enable performance monitoring
-  usePerformanceMonitoring();
-  useUserInteractionMonitoring();
-  
-  // Test Supabase connection on app load
-  React.useEffect(() => {
-    testSupabaseConnection();
-  }, []);
-
-  return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/catalog" element={<Catalog />} />
-              <Route path="/product/:id" element={<ProductPage />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/delivery/signup" element={<DeliverySignup />} />
-              
-              <Route
-                path="/checkout"
-                element={
-                  <ProtectedRoute>
-                    <Checkout />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/orders"
-                element={
-                  <ProtectedRoute>
-                    <OrderHistory />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/order/:id"
-                element={
-                  <ProtectedRoute>
-                    <OrderTracking />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-              
-              <Route
-                path="/delivery/dashboard"
-                element={
-                  <ProtectedRoute requiredRole="delivery">
-                    <DeliveryDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              
-              <Route
-                path="/admin/*"
-                element={
-                  <ProtectedRoute requiredRole="admin">
-                    <Routes>
-                      <Route path="dashboard" element={<AdminDashboard />} />
-                      <Route path="products" element={<AdminProducts />} />
-                      <Route path="orders" element={<AdminOrders />} />
-                      <Route path="delivery-partners" element={<AdminDeliveryPartners />} />
-                      <Route path="malicious-activity" element={<AdminMaliciousActivity />} />
-                      <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
-                    </Routes>
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Developer Routes - Special Access */}
-              <Route
-                path="/dev/*"
-                element={
-                  <ProtectedRoute requiredRole="admin">
-                    <Routes>
-                      <Route path="dashboard" element={<DevDashboard />} />
-                      <Route path="*" element={<Navigate to="/dev/dashboard" replace />} />
-                    </Routes>
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Layout>
+        <Toaster position="top-right" richColors />
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 

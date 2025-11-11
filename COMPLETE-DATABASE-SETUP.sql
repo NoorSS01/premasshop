@@ -1,9 +1,10 @@
 -- =====================================================
--- SUPER SIMPLE DATABASE SETUP - WORKS PERMANENTLY!
--- Run ONCE and forget about it forever!
+-- PREMASSHOP DATABASE SETUP
+-- Complete database schema for e-commerce platform
+-- Run this in your Supabase SQL Editor
 -- =====================================================
 
--- Clean slate
+-- Clean slate - Drop all tables and functions
 DROP TABLE IF EXISTS public.cart_items CASCADE;
 DROP TABLE IF EXISTS public.order_items CASCADE;
 DROP TABLE IF EXISTS public.orders CASCADE;
@@ -13,26 +14,27 @@ DROP TABLE IF EXISTS public.settings CASCADE;
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
 
--- Enable extensions
+-- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Users table
+-- =====================================================
+-- 1. USERS TABLE
+-- =====================================================
 CREATE TABLE public.users (
   id UUID REFERENCES auth.users(id) PRIMARY KEY,
   full_name TEXT NOT NULL DEFAULT 'User',
   email TEXT NOT NULL UNIQUE,
   phone TEXT,
-  role TEXT NOT NULL DEFAULT 'customer',
+  role TEXT NOT NULL DEFAULT 'customer' CHECK (role IN ('customer', 'admin', 'delivery_partner')),
   address JSONB,
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Disable RLS for development
-ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
-
--- 3. CREATE PRODUCTS TABLE
+-- =====================================================
+-- 2. PRODUCTS TABLE
+-- =====================================================
 CREATE TABLE public.products (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   name TEXT NOT NULL,
@@ -50,7 +52,9 @@ CREATE TABLE public.products (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 4. CREATE ORDERS TABLE (WITH PROPER ADDRESS COLUMN)
+-- =====================================================
+-- 3. ORDERS TABLE
+-- =====================================================
 CREATE TABLE public.orders (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES public.users(id) NOT NULL,
@@ -67,7 +71,9 @@ CREATE TABLE public.orders (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 5. CREATE ORDER_ITEMS TABLE
+-- =====================================================
+-- 4. ORDER ITEMS TABLE
+-- =====================================================
 CREATE TABLE public.order_items (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   order_id UUID REFERENCES public.orders(id) ON DELETE CASCADE NOT NULL,
@@ -78,7 +84,9 @@ CREATE TABLE public.order_items (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 6. CREATE CART_ITEMS TABLE
+-- =====================================================
+-- 5. CART ITEMS TABLE
+-- =====================================================
 CREATE TABLE public.cart_items (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES public.users(id) NOT NULL,
@@ -89,7 +97,9 @@ CREATE TABLE public.cart_items (
   UNIQUE(user_id, product_id)
 );
 
--- 7. CREATE SETTINGS TABLE
+-- =====================================================
+-- 6. SETTINGS TABLE
+-- =====================================================
 CREATE TABLE public.settings (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   key TEXT NOT NULL UNIQUE,
@@ -99,7 +109,9 @@ CREATE TABLE public.settings (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 8. CREATE INDEXES FOR PERFORMANCE
+-- =====================================================
+-- 7. INDEXES FOR PERFORMANCE
+-- =====================================================
 CREATE INDEX idx_users_email ON public.users(email);
 CREATE INDEX idx_users_role ON public.users(role);
 CREATE INDEX idx_products_category ON public.products(category);
@@ -113,7 +125,9 @@ CREATE INDEX idx_order_items_product_id ON public.order_items(product_id);
 CREATE INDEX idx_cart_items_user_id ON public.cart_items(user_id);
 CREATE INDEX idx_cart_items_product_id ON public.cart_items(product_id);
 
--- 9. DISABLE RLS FOR DEVELOPMENT (Enable in production)
+-- =====================================================
+-- 8. DISABLE RLS (Row Level Security)
+-- =====================================================
 ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.orders DISABLE ROW LEVEL SECURITY;
@@ -121,7 +135,10 @@ ALTER TABLE public.order_items DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cart_items DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.settings DISABLE ROW LEVEL SECURITY;
 
--- Simple user sync function
+-- =====================================================
+-- 9. USER SYNC TRIGGER
+-- =====================================================
+-- Automatically create a user record when someone signs up
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -145,8 +162,9 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
--- 12. INSERT PRODUCTS (BULLETPROOF - INSERTS ONE BY ONE)
--- Clear existing products first
+-- =====================================================
+-- 10. SAMPLE PRODUCTS
+-- =====================================================
 DELETE FROM public.products;
 
 -- Insert products individually
@@ -174,7 +192,9 @@ VALUES ('Milk Packet', 'Fresh dairy milk', 55.00, 45.00, 0, 'dairy', 'coming_soo
 INSERT INTO public.products (name, description, price, cost_price, stock, category, status, images, sku, weight, unit, created_at, updated_at) 
 VALUES ('Potato Chips', 'Crispy and delicious snacks', 30.00, 20.00, 0, 'snacks', 'coming_soon', ARRAY['https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400'], 'CHI-50G-001', '50g', 'packet', NOW(), NOW());
 
--- 13. INSERT SETTINGS
+-- =====================================================
+-- 11. DEFAULT SETTINGS
+-- =====================================================
 INSERT INTO public.settings (key, value, description) VALUES
 ('delivery_fee', '{"amount": 20}', 'Standard delivery fee'),
 ('min_order_amount', '{"amount": 50}', 'Minimum order amount for delivery'),
@@ -182,7 +202,9 @@ INSERT INTO public.settings (key, value, description) VALUES
 ('auto_assign_orders', '{"enabled": true}', 'Automatically assign orders to delivery partners'),
 ('order_timeout', '{"minutes": 30}', 'Order confirmation timeout in minutes');
 
--- Sync existing users
+-- =====================================================
+-- 12. SYNC EXISTING USERS
+-- =====================================================
 INSERT INTO public.users (id, full_name, email, role, phone)
 SELECT 
   au.id,
@@ -193,33 +215,113 @@ SELECT
 FROM auth.users au
 ON CONFLICT (id) DO NOTHING;
 
--- Final verification
-SELECT 
-  '✅ SETUP COMPLETE!' as status,
-  (SELECT COUNT(*) FROM public.users) as users_table,
-  (SELECT COUNT(*) FROM public.products) as products_table,
-  (SELECT COUNT(*) FROM public.orders) as orders_table,
-  'Database is ready!' as message;
+-- =====================================================
+-- 13. FIX PHONE NUMBERS FOR EXISTING USERS
+-- =====================================================
+-- Update users who have phone in metadata but not in public.users table
+UPDATE public.users 
+SET phone = au.raw_user_meta_data->>'phone',
+    updated_at = NOW()
+FROM auth.users au
+WHERE public.users.id = au.id 
+  AND (public.users.phone IS NULL OR public.users.phone = '')
+  AND au.raw_user_meta_data->>'phone' IS NOT NULL
+  AND au.raw_user_meta_data->>'phone' != '';
 
 -- =====================================================
--- ✅ DATABASE SETUP COMPLETE!
+-- 14. AUTO-SYNC TRIGGER FOR PHONE NUMBERS
+-- =====================================================
+-- Function to sync phone number when user metadata changes
+CREATE OR REPLACE FUNCTION public.sync_user_phone()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Update phone number in public.users when it changes in auth.users metadata
+  UPDATE public.users 
+  SET phone = NEW.raw_user_meta_data->>'phone',
+      updated_at = NOW()
+  WHERE id = NEW.id;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create trigger for auto-syncing phone numbers
+DROP TRIGGER IF EXISTS sync_user_phone_trigger ON auth.users;
+CREATE TRIGGER sync_user_phone_trigger
+AFTER UPDATE ON auth.users
+FOR EACH ROW
+WHEN (OLD.raw_user_meta_data IS DISTINCT FROM NEW.raw_user_meta_data)
+EXECUTE FUNCTION public.sync_user_phone();
+
+-- Also create trigger for new user registration
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (id, full_name, email, role, phone)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', 'User'),
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'role', 'customer'),
+    NEW.raw_user_meta_data->>'phone'
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create trigger for new user registration
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth.users
+FOR EACH ROW
+EXECUTE FUNCTION public.handle_new_user();
+
+-- =====================================================
+-- 15. VERIFICATION
+-- =====================================================
+SELECT 
+  '✅ DATABASE SETUP COMPLETE!' as status,
+  (SELECT COUNT(*) FROM public.users) as total_users,
+  (SELECT COUNT(*) FROM public.products) as total_products,
+  (SELECT COUNT(*) FROM public.orders) as total_orders,
+  (SELECT COUNT(*) FROM public.users WHERE phone IS NOT NULL AND phone != '') as users_with_phone,
+  'All tables and phone sync created successfully!' as message;
+
+-- Show users with phone numbers for verification
+SELECT 
+  'Users with phone numbers:' as info,
+  id,
+  full_name,
+  email,
+  phone
+FROM public.users 
+WHERE phone IS NOT NULL AND phone != ''
+ORDER BY created_at DESC;
+
+-- Show users without phone numbers (if any)
+SELECT 
+  'Users without phone numbers (may need manual update):' as info,
+  id,
+  full_name,
+  email
+FROM public.users 
+WHERE phone IS NULL OR phone = ''
+ORDER BY created_at DESC;
+
+-- =====================================================
+-- SETUP COMPLETE!
+-- =====================================================
+-- Created:
+-- ✅ 6 Tables (users, products, orders, order_items, cart_items, settings)
+-- ✅ 8 Sample products
+-- ✅ Indexes for performance
+-- ✅ Auto user sync trigger
+-- ✅ Phone number sync triggers
+-- ✅ Default settings
+-- ✅ Phone number fixes for existing users
 -- 
--- What was created:
--- ✅ All tables (users, products, orders, etc.)
--- ✅ 8 Products added (5 water bottles + 3 coming soon)
--- ✅ User sync trigger activated
--- ✅ Settings configured
--- 
--- Check the results above:
--- - products_table should show: 8
--- - If it shows 0, there was an error - check console
--- 
--- Next steps:
--- 1. Hard refresh your browser (Ctrl+Shift+R)
--- 2. Products should load immediately
--- 3. You can add more products through Admin panel later
--- 
--- For Hostinger deployment:
--- - See DEPLOY-INSTRUCTIONS.md file
--- - Use static hosting, NOT PHP hosting
+-- Next Steps:
+-- 1. Copy your Supabase URL and anon key
+-- 2. Add them to your frontend .env file
+-- 3. Deploy to Hostinger
 -- =====================================================
