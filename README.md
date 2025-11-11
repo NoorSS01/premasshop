@@ -1,3 +1,132 @@
+# Prema's Shop (Production-Ready Redesign)
+
+Modern quick-commerce web app with Vite + React (TypeScript) frontend and Supabase backend (auth, database, and Edge Functions). This branch prepares the app for production with linting/formatting, CI, DB schema fixes, and UX improvements.
+
+## Tech Stack
+- Frontend: React + TypeScript (Vite), React Router, TailwindCSS
+- Backend: Supabase (Auth, Postgres, RLS, Edge Functions)
+- Data: Postgres on Supabase (with RLS), `products`, `orders`, `order_items`, etc.
+- Testing: Vitest + React Testing Library (unit), Jest (integration)
+- CI: GitHub Actions
+- Lint/Format: ESLint + Prettier, Husky pre-commit
+
+## Prerequisites
+- Node.js 20+
+- npm 9+
+- Supabase project (URL, anon key, service role key)
+
+## Environment Variables
+Set these in your environment or your Hostinger control panel as app variables:
+- VITE_SUPABASE_URL
+- VITE_SUPABASE_ANON_KEY
+- SUPABASE_URL (same as VITE_SUPABASE_URL)
+- SUPABASE_ANON_KEY (same as VITE_SUPABASE_ANON_KEY)
+- SUPABASE_SERVICE_ROLE_KEY
+- VITE_APP_URL (e.g., http://localhost:5173 or your production domain)
+
+## Install and Run Locally
+```bash
+# from repository root
+npm install
+cd frontend && npm install && cd ..
+
+# start dev (Vite)
+npm run dev
+```
+
+## Tests
+```bash
+# Unit tests (frontend)
+cd frontend
+npm test -- --run
+
+# Integration tests (Jest) - requires Supabase env vars
+cd ../tests
+VITE_SUPABASE_URL=... VITE_SUPABASE_ANON_KEY=... npm test
+```
+
+## Lint and Format
+```bash
+npm run lint
+npm run format
+```
+
+## Build
+```bash
+npm run build
+```
+
+## Database Migrations
+Run SQL in Supabase SQL Editor in order:
+- `migrations/001_initial_schema.sql`
+- `migrations/002_seed_data.sql`
+- `migrations/003_products_categories_and_order_items.sql`
+
+Or via helper (requires service role; may need manual SQL editor if RPC is not available):
+```bash
+npm run migrate
+```
+
+## Deployment (Hostinger)
+1. Build locally:
+   ```bash
+   npm run build
+   ```
+2. Deploy frontend artifacts via Hostinger’s Node app or static hosting:
+   - If using Node app: serve `frontend/dist` with a lightweight server (e.g., `serve`) or configure Hostinger to point to the `dist` as static.
+   - If using static hosting/FTP: upload `frontend/dist` contents to `public_html` (or your static root).
+3. Configure Environment Variables in Hostinger:
+   - VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
+   - SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY (for Edge/webhook backends you might proxy or host externally)
+4. DNS and HTTPS:
+   - Point your domain A/AAAA records to Hostinger.
+   - Enable HTTPS via Hostinger’s SSL (Let’s Encrypt).
+5. Verify:
+   - Homepage loads and is HTTPS.
+   - `/robots.txt` and `/sitemap.xml` resolve.
+   - Products render, cart and checkout flow works.
+   - Order creation persists and appears in Delivery and Admin pages.
+
+## GitHub Actions CI
+CI runs on PRs and pushes to `main` and `feature/redesign-production`:
+- Lints, unit tests, build the frontend, and runs integration tests (if Supabase env secrets are configured in repo settings).
+
+## Branch/PR Workflow
+```bash
+git checkout -b feature/redesign-production
+# make changes, commit small atomic edits
+git push -u origin feature/redesign-production
+```
+Open a PR to `main` with:
+- Summary of changes, screenshots for UI where helpful
+- Schema changes and migration order
+- Any manual steps for Hostinger
+
+Once merged:
+```bash
+git checkout main
+git pull
+git tag v1.0.0 -m "Production-ready redesign"
+git push origin v1.0.0
+```
+
+## Security & Performance
+- RLS policies enforced (see `001_initial_schema.sql`)
+- Input sanitation handled by client validation; extend with server-side validations in Edge Functions where applicable
+- Rate limit sensitive endpoints via Supabase/edge middleware if enabled; otherwise add a proxy with rate limiting
+- CSP and headers should be configured at hosting/CDN level; add Helmet-equivalent headers if serving via Node
+- Images lazy-loaded; assets built via Vite with code-splitting
+
+## Accessibility & SEO
+- WCAG AA-friendly colors and focus styles via Tailwind classes
+- Meta tags, Open Graph/Twitter tags in `frontend/index.html`
+- `frontend/public/robots.txt` and `frontend/public/sitemap.xml` are present
+
+## Notes and Assumptions
+- Authentication screens are preserved as-is per request.
+- Auto-assign delivery is supported by an admin-only `assign-order` function; for full auto-assignment, add a DB trigger or a server job to call it on order creation.
+- The schema now includes `order_items` and product `category` fields to support richer catalog/admin views.
+
 # Prema's Shop - Premium Quick Commerce Platform
 
 A production-ready, mobile-first e-commerce platform built with React, Tailwind CSS, Supabase, and PayU payment integration.
