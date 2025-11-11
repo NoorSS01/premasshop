@@ -34,7 +34,7 @@ ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
 
 -- 3. CREATE PRODUCTS TABLE
 CREATE TABLE public.products (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT,
   price DECIMAL(10,2) NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE public.products (
 
 -- 4. CREATE ORDERS TABLE (WITH PROPER ADDRESS COLUMN)
 CREATE TABLE public.orders (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES public.users(id) NOT NULL,
   total_amount DECIMAL(10,2) NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled')),
@@ -69,7 +69,7 @@ CREATE TABLE public.orders (
 
 -- 5. CREATE ORDER_ITEMS TABLE
 CREATE TABLE public.order_items (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   order_id UUID REFERENCES public.orders(id) ON DELETE CASCADE NOT NULL,
   product_id UUID REFERENCES public.products(id) NOT NULL,
   quantity INTEGER NOT NULL CHECK (quantity > 0),
@@ -80,7 +80,7 @@ CREATE TABLE public.order_items (
 
 -- 6. CREATE CART_ITEMS TABLE
 CREATE TABLE public.cart_items (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID REFERENCES public.users(id) NOT NULL,
   product_id UUID REFERENCES public.products(id) NOT NULL,
   quantity INTEGER NOT NULL CHECK (quantity > 0),
@@ -91,7 +91,7 @@ CREATE TABLE public.cart_items (
 
 -- 7. CREATE SETTINGS TABLE
 CREATE TABLE public.settings (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   key TEXT NOT NULL UNIQUE,
   value JSONB NOT NULL,
   description TEXT,
