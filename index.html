@@ -55,22 +55,6 @@
 </head>
 <body class="bg-gray-50">
     <div id="app">
-        <!-- Loading State -->
-        <div id="loading" class="min-h-screen flex items-center justify-center bg-green-600">
-            <div class="text-center">
-                <div class="w-16 h-16 bg-white rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <span class="text-green-600 font-bold text-2xl">P</span>
-                </div>
-                <h1 class="text-2xl font-bold text-white mb-2">Premas Shop</h1>
-                <p class="text-green-100">Loading your shopping experience...</p>
-                <div class="mt-4">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main App -->
-        <div id="main-app" class="hidden">
             <!-- Header -->
             <header class="bg-green-600 text-white sticky top-0 z-40">
                 <div class="px-4 py-3">
@@ -225,32 +209,21 @@
         function initApp() {
             console.log('Initializing Premas Shop...');
             
-            // Initialize Lucide icons
+            // Initialize Lucide icons immediately
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
             
-            // Setup event listeners
+            // Setup event listeners immediately
             setupEventListeners();
             
-            // Load products
+            // Load products immediately
             loadProducts();
             
-            // Check authentication
+            // Check authentication immediately
             checkAuth();
             
-            // Hide loading, show main app
-            setTimeout(() => {
-                const loading = document.getElementById('loading');
-                const mainApp = document.getElementById('main-app');
-                if (loading) loading.style.display = 'none';
-                if (mainApp) mainApp.style.display = 'block';
-                
-                // Re-initialize icons
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
-            }, 1000);
+            console.log('App initialized successfully!');
         }
 
         async function checkAuth() {
@@ -591,12 +564,8 @@
             }
         }
 
-        // Start the app when DOM is loaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
-        }
+        // Start the app immediately
+        initApp();
 
         console.log('Premas Shop scripts loaded!');
     </script>
