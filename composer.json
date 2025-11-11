@@ -1,0 +1,14 @@
+{
+    "name": "premas/shop",
+    "description": "Premas Shop - React E-commerce App",
+    "type": "project",
+    "require": {},
+    "scripts": {
+        "post-install-cmd": [
+            "chmod +x build.sh",
+            "./build.sh"
+        ]
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
