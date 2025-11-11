@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../lib/supabase';
+import { filterAndSortProducts } from '../../utils/products';
 
 export default function Catalog() {
   const [searchParams] = useSearchParams();
@@ -66,39 +67,8 @@ export default function Catalog() {
 
   const filteredAndSortedProducts = useMemo(() => {
     if (!products) return [];
-
-    let filtered = products.filter((product: any) => {
-      // Search filter
-      const matchesSearch =
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description?.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Status filter
-      const matchesStatus = filter === 'all' || product.status === filter;
-
-      // Category filter (defensive, server already filtered)
-      const matchesCategory = category === 'all' || product.category === category;
-
-      return matchesSearch && matchesStatus && matchesCategory;
-    });
-
-    // Sort
-    filtered.sort((a: any, b: any) => {
-      switch (sortBy) {
-        case 'price_low':
-          return a.price - b.price;
-        case 'price_high':
-          return b.price - a.price;
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'newest':
-        default:
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      }
-    });
-
-    return filtered;
-  }, [products, searchQuery, filter, sortBy]);
+    return filterAndSortProducts(products as any, searchQuery, filter, sortBy, category);
+  }, [products, searchQuery, filter, sortBy, category]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -249,6 +219,8 @@ export default function Catalog() {
                         src={product.images[0]}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                        decoding="async"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
