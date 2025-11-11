@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premas Shop - Fresh Essentials Delivered Fast</title>
+    <meta name="description" content="Get your daily essentials delivered to your doorstep in minutes. Fresh water, groceries, and more.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <!-- Header -->
+        <header class="bg-green-600 text-white">
+            <div class="px-4 py-3">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-lg">P</span>
+                        </div>
+                        <div>
+                            <p class="text-lg font-bold">Premas Shop</p>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <button class="relative p-2 text-white" onclick="showCart()">
+                            <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                            <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Search -->
+                <div class="relative">
+                    <input type="text" placeholder="Search for products..." class="w-full px-4 py-2 rounded-lg text-gray-900 placeholder-gray-500">
+                    <i data-lucide="search" class="absolute right-3 top-2.5 w-5 h-5 text-gray-400"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="bg-gradient-to-b from-green-600 to-green-500 text-white px-4 py-8">
+            <div class="max-w-md mx-auto text-center">
+                <h1 class="text-2xl font-bold mb-2">Fresh Essentials, Fast Delivery</h1>
+                <p class="text-green-100 mb-6">Get water, groceries, and daily essentials delivered to your doorstep in minutes!</p>
+                <button class="bg-white text-green-600 px-6 py-2 rounded-lg font-semibold hover:bg-green-50">
+                    Start Shopping
+                </button>
+            </div>
+        </section>
+
+        <!-- Categories -->
+        <section class="px-4 py-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Shop by Category</h2>
+            <div class="grid grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                        <i data-lucide="package" class="w-8 h-8 text-blue-600"></i>
+                    </div>
+                    <p class="text-sm text-gray-700">Water</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                        <i data-lucide="package" class="w-8 h-8 text-orange-600"></i>
+                    </div>
+                    <p class="text-sm text-gray-700">Groceries</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                        <i data-lucide="package" class="w-8 h-8 text-purple-600"></i>
+                    </div>
+                    <p class="text-sm text-gray-700">Dairy</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                        <i data-lucide="package" class="w-8 h-8 text-red-600"></i>
+                    </div>
+                    <p class="text-sm text-gray-700">Snacks</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products -->
+        <section class="px-4 py-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4">Popular Products</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white rounded-lg border border-gray-200 p-3">
+                    <div class="aspect-square bg-gray-50 rounded-lg flex items-center justify-center mb-3">
+                        <i data-lucide="package" class="w-12 h-12 text-gray-400"></i>
+                    </div>
+                    <h3 class="font-medium text-gray-900 mb-1">Mineral Water</h3>
+                    <p class="text-sm text-gray-500 mb-2">20L Bottle</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-base font-bold text-gray-900">₹40</span>
+                        <button class="bg-green-600 text-white px-3 py-1 rounded-lg text-sm" onclick="addToCart('Mineral Water', 40)">
+                            Add
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg border border-gray-200 p-3">
+                    <div class="aspect-square bg-gray-50 rounded-lg flex items-center justify-center mb-3">
+                        <i data-lucide="package" class="w-12 h-12 text-gray-400"></i>
+                    </div>
+                    <h3 class="font-medium text-gray-900 mb-1">Fresh Milk</h3>
+                    <p class="text-sm text-gray-500 mb-2">1L Pack</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-base font-bold text-gray-900">₹60</span>
+                        <button class="bg-green-600 text-white px-3 py-1 rounded-lg text-sm" onclick="addToCart('Fresh Milk', 60)">
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+            <div class="grid grid-cols-4 py-2">
+                <button class="flex flex-col items-center py-2 text-green-600">
+                    <i data-lucide="home" class="w-5 h-5 mb-1"></i>
+                    <span class="text-xs">Home</span>
+                </button>
+                <button class="flex flex-col items-center py-2 text-gray-400">
+                    <i data-lucide="shopping-bag" class="w-5 h-5 mb-1"></i>
+                    <span class="text-xs">Orders</span>
+                </button>
+                <button class="flex flex-col items-center py-2 text-gray-400">
+                    <i data-lucide="user" class="w-5 h-5 mb-1"></i>
+                    <span class="text-xs">Profile</span>
+                </button>
+                <button class="flex flex-col items-center py-2 text-gray-400">
+                    <i data-lucide="menu" class="w-5 h-5 mb-1"></i>
+                    <span class="text-xs">More</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Simple cart functionality
+        let cart = [];
+        
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            updateCartCount();
+            showToast(`${name} added to cart!`);
+        }
+        
+        function updateCartCount() {
+            document.getElementById('cart-count').textContent = cart.length;
+        }
+        
+        function showToast(message) {
+            // Simple toast notification
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-4 right-4 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50';
+            toast.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="shopping-cart" class="w-4 h-4 text-green-600"></i>
+                    </div>
+                    <p class="text-sm text-gray-900">${message}</p>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        function showCart() {
+            showToast(`Cart has ${cart.length} items`);
+        }
+    </script>
+</body>
+</html>
