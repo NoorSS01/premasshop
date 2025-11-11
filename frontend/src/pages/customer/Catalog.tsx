@@ -8,13 +8,28 @@ export default function Catalog() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'coming_soon'>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high' | 'name'>('newest');
+  const [category, setCategory] = useState<string>('all');
+
+  const categories = [
+    { id: 'all', name: 'All' },
+    { id: 'groceries', name: 'Groceries' },
+    { id: 'fruits_vegetables', name: 'Fruits & Vegetables' },
+    { id: 'dairy', name: 'Dairy' },
+    { id: 'snacks', name: 'Snacks' },
+    { id: 'beverages', name: 'Beverages' },
+    { id: 'personal_care', name: 'Personal Care' },
+    { id: 'bakery', name: 'Bakery' },
+    { id: 'frozen', name: 'Frozen' },
+    { id: 'household', name: 'Household' },
+    { id: 'baby', name: 'Baby' },
+    { id: 'pet', name: 'Pet Care' },
+    { id: 'water', name: 'Water' },
+  ];
 
   // Handle category filtering from URL
   useEffect(() => {
     const category = searchParams.get('category');
-    if (category === 'water') {
-      setSearchQuery('water');
-    }
+    if (category) setCategory(category);
   }, [searchParams]);
 
   const { data: products, isLoading, error } = useQuery({
@@ -27,12 +42,13 @@ export default function Catalog() {
         setTimeout(() => reject(new Error('Query timeout')), 5000); // 5 second timeout
       });
       
-      const queryPromise = supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+      let query = supabase.from('products').select('*').order('created_at', { ascending: false });
+
+      if (category && category !== 'all') {
+        query = query.eq('category', category);
+      }
       
-      const result = await Promise.race([queryPromise, timeoutPromise]) as any;
+      const result = (await Promise.race([query, timeoutPromise])) as any;
       const { data, error } = result;
       
       if (error) {
@@ -60,7 +76,10 @@ export default function Catalog() {
       // Status filter
       const matchesStatus = filter === 'all' || product.status === filter;
 
-      return matchesSearch && matchesStatus;
+      // Category filter (defensive, server already filtered)
+      const matchesCategory = category === 'all' || product.category === category;
+
+      return matchesSearch && matchesStatus && matchesCategory;
     });
 
     // Sort
@@ -88,6 +107,26 @@ export default function Catalog() {
         <div className="pt-6 pb-4 text-center">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Shop</h1>
           <p className="text-sm sm:text-base text-gray-600">Discover our premium collection</p>
+        </div>
+
+        {/* Category Chips */}
+        <div className="mb-4 overflow-x-auto no-scrollbar">
+          <div className="flex gap-2 pb-1">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setCategory(cat.id)}
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                  category === cat.id
+                    ? 'bg-primary-600 text-white shadow'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+                aria-pressed={category === cat.id}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Filters and Sort - Fixed Layout */}

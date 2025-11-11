@@ -60,6 +60,7 @@ export default function Checkout() {
           payment_status: orderData.payment_status,
           status: orderData.status,
           address: orderData.address, // This is the correct field name
+          items: orderData.items_jsonb,
           notes: orderData.notes
         })
         .select()
@@ -155,6 +156,7 @@ export default function Checkout() {
       const order = await createOrder.mutateAsync({
         user_id: user.id, // Ensure user ID is properly set
         items: orderItems,
+        items_jsonb: orderItems.map((it) => ({ product_id: it.product_id, name: it.name, qty: it.quantity, price: it.price })),
         total_amount: total + 20,
         payment_method: paymentMethod,
         payment_status: paymentMethod === 'COD' ? 'pending' : 'pending',
