@@ -53,7 +53,7 @@
         }
     </style>
 </head>
-<body class="bg-white">
+<body class="bg-gray-50">
     <div id="app">
         <!-- Header -->
         <header class="bg-green-600 text-white sticky top-0 z-40">
@@ -219,25 +219,26 @@
             </div>
         </div>
 
-        <!-- Bottom Navigation -->
-        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40">
+        <!-- Bottom Navigation (exact match to React app) -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
             <div class="grid grid-cols-4 py-2">
-                <button class="nav-btn flex flex-col items-center py-2 text-green-600" data-page="home">
-                    <i data-lucide="home" class="w-5 h-5 mb-1"></i>
-                    <span class="text-xs">Home</span>
-                </button>
-                <button class="nav-btn flex flex-col items-center py-2 text-gray-400" data-page="orders">
-                    <i data-lucide="shopping-bag" class="w-5 h-5 mb-1"></i>
-                    <span class="text-xs">Orders</span>
-                </button>
-                <button class="nav-btn flex flex-col items-center py-2 text-gray-400" data-page="profile">
-                    <i data-lucide="user" class="w-5 h-5 mb-1"></i>
-                    <span class="text-xs">Profile</span>
-                </button>
-                <button class="nav-btn flex flex-col items-center py-2 text-gray-400" data-page="more">
-                    <i data-lucide="menu" class="w-5 h-5 mb-1"></i>
-                    <span class="text-xs">More</span>
-                </button>
+                <a href="#" onclick="navigateTo('home')" class="nav-btn flex flex-col items-center space-y-1 py-2">
+                    <i data-lucide="home" class="w-5 h-5 text-green-600"></i>
+                    <span class="text-xs text-green-600 font-medium">Home</span>
+                </a>
+                <a href="#" onclick="navigateTo('orders')" class="nav-btn flex flex-col items-center space-y-1 py-2">
+                    <i data-lucide="package" class="w-5 h-5 text-gray-400"></i>
+                    <span class="text-xs text-gray-400">Orders</span>
+                </a>
+                <a href="#" onclick="navigateTo('cart')" class="nav-btn flex flex-col items-center space-y-1 py-2 relative">
+                    <i data-lucide="shopping-cart" class="w-5 h-5 text-gray-400"></i>
+                    <span class="text-xs text-gray-400">Cart</span>
+                    <span id="bottom-nav-cart-count" class="absolute top-1 right-4 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center hidden">0</span>
+                </a>
+                <a href="#" onclick="navigateTo('profile')" class="nav-btn flex flex-col items-center space-y-1 py-2">
+                    <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
+                    <span class="text-xs text-gray-400">Profile</span>
+                </a>
             </div>
         </nav>
     </div>
@@ -531,12 +532,63 @@
         function updateCartCount() {
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             const cartCount = document.getElementById('cart-count');
+            const bottomNavCartCount = document.getElementById('bottom-nav-cart-count');
+            
             if (cartCount) {
                 if (totalItems > 0) {
                     cartCount.textContent = totalItems;
                     cartCount.classList.remove('hidden');
                 } else {
                     cartCount.classList.add('hidden');
+                }
+            }
+            
+            if (bottomNavCartCount) {
+                if (totalItems > 0) {
+                    bottomNavCartCount.textContent = totalItems;
+                    bottomNavCartCount.classList.remove('hidden');
+                } else {
+                    bottomNavCartCount.classList.add('hidden');
+                }
+            }
+        }
+
+        function navigateTo(page) {
+            // Update bottom navigation active state
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const icon = btn.querySelector('i');
+                const span = btn.querySelector('span');
+                if (btn.getAttribute('onclick')?.includes(page)) {
+                    icon.classList.remove('text-gray-400');
+                    icon.classList.add('text-green-600');
+                    span.classList.remove('text-gray-400');
+                    span.classList.add('text-green-600', 'font-medium');
+                } else {
+                    icon.classList.remove('text-green-600');
+                    icon.classList.add('text-gray-400');
+                    span.classList.remove('text-green-600', 'font-medium');
+                    span.classList.add('text-gray-400');
+                }
+            });
+            
+            // Re-initialize icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            if (page === 'cart') {
+                showToast('Cart page coming soon!');
+            } else if (page === 'orders') {
+                if (currentUser) {
+                    showToast('Your orders will appear here');
+                } else {
+                    showToast('Please sign in to view orders');
+                }
+            } else if (page === 'profile') {
+                if (currentUser) {
+                    showToast(`Welcome back, ${currentUser.email}`);
+                } else {
+                    signIn();
                 }
             }
         }
@@ -588,7 +640,7 @@
             const cartBtn = document.getElementById('cart-btn');
             if (cartBtn) {
                 cartBtn.addEventListener('click', () => {
-                    showToast('Cart page coming soon!');
+                    navigateTo('cart');
                 });
             }
             
@@ -622,38 +674,6 @@
                     } else {
                         const filtered = products.filter(p => p.category === category);
                         renderProducts(filtered);
-                    }
-                });
-            });
-            
-            // Navigation
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    // Remove active state from all
-                    document.querySelectorAll('.nav-btn').forEach(b => {
-                        b.classList.remove('text-green-600');
-                        b.classList.add('text-gray-400');
-                    });
-                    // Add active state to clicked
-                    this.classList.remove('text-gray-400');
-                    this.classList.add('text-green-600');
-                    
-                    const page = this.dataset.page;
-                    
-                    if (page === 'profile') {
-                        if (currentUser) {
-                            showToast(`Welcome back, ${currentUser.email}`);
-                        } else {
-                            await signIn();
-                        }
-                    } else if (page === 'orders') {
-                        if (currentUser) {
-                            showToast('Your orders will appear here');
-                        } else {
-                            showToast('Please sign in to view orders');
-                        }
-                    } else {
-                        showToast(`${page.charAt(0).toUpperCase() + page.slice(1)} page coming soon!`);
                     }
                 });
             });
