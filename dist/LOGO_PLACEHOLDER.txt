@@ -1,0 +1,19 @@
+⚠️ LOGO PLACEHOLDER
+
+Replace this file with your actual logo.
+
+Requirements:
+- Filename: logo.png
+- Format: PNG or SVG
+- Recommended size: 200x200px or similar aspect ratio
+- File size: Optimized for web (< 100KB recommended)
+
+The logo is used in:
+- Navbar component (frontend/src/components/Navbar.tsx)
+- Referenced as: /logo.png
+
+After replacing:
+1. Delete this .txt file
+2. Rebuild: npm run build
+3. Redeploy to Hostinger
+

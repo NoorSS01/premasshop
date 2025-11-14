@@ -7,9 +7,9 @@ node_modules/
 coverage/
 *.log
 
-# Production
-dist/
-build/
+# Production builds (built files go to root, so ignore intermediate builds)
+src-project/dist/
+src-project/build/
 
 # Environment variables
 .env
