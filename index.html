@@ -150,7 +150,7 @@
         </section>
 
         <!-- Products Grid -->
-        <section class="px-4 py-4 pb-24">
+        <section id="home-content" class="px-4 py-4">
             <div class="flex items-center justify-between mb-3">
                 <h2 class="text-lg font-bold text-gray-900">All Products</h2>
                 <p class="text-sm text-gray-600"><span id="products-count">0</span> items</p>
@@ -192,6 +192,39 @@
             <!-- Products Grid -->
             <div id="products-grid" class="grid grid-cols-2 gap-4 hidden">
                 <!-- Products will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Orders Page Content -->
+        <section id="orders-content" class="px-4 py-4 hidden">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">My Orders</h1>
+                <div id="orders-list" class="space-y-4">
+                    <!-- Orders will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Cart Page Content -->
+        <section id="cart-content" class="px-4 py-4 hidden">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Shopping Cart</h1>
+                <div id="cart-items" class="space-y-4">
+                    <!-- Cart items will be loaded here -->
+                </div>
+                <div id="cart-summary" class="border-t pt-4 mt-6 hidden">
+                    <!-- Cart summary will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Page Content -->
+        <section id="profile-content" class="px-4 py-4 hidden">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Profile</h1>
+                <div id="profile-info" class="space-y-4">
+                    <!-- Profile info will be loaded here -->
+                </div>
             </div>
         </section>
 
@@ -554,6 +587,15 @@
         }
 
         function navigateTo(page) {
+            // Hide all page content
+            document.getElementById('home-content').classList.add('hidden');
+            document.getElementById('orders-content').classList.add('hidden');
+            document.getElementById('cart-content').classList.add('hidden');
+            document.getElementById('profile-content').classList.add('hidden');
+            
+            // Show the selected page content
+            document.getElementById(`${page}-content`).classList.remove('hidden');
+            
             // Update bottom navigation active state
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 const icon = btn.querySelector('i');
@@ -571,25 +613,176 @@
                 }
             });
             
+            // Load page-specific content
+            if (page === 'home') {
+                // Home content is already loaded
+            } else if (page === 'orders') {
+                loadOrdersPage();
+            } else if (page === 'cart') {
+                loadCartPage();
+            } else if (page === 'profile') {
+                loadProfilePage();
+            }
+            
             // Re-initialize icons
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
+        }
+
+        function loadOrdersPage() {
+            const ordersList = document.getElementById('orders-list');
+            if (!ordersList) return;
             
-            if (page === 'cart') {
-                showToast('Cart page coming soon!');
-            } else if (page === 'orders') {
-                if (currentUser) {
-                    showToast('Your orders will appear here');
-                } else {
-                    showToast('Please sign in to view orders');
-                }
-            } else if (page === 'profile') {
-                if (currentUser) {
-                    showToast(`Welcome back, ${currentUser.email}`);
-                } else {
-                    signIn();
-                }
+            if (!currentUser) {
+                ordersList.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="package" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Please sign in to view orders</h3>
+                        <p class="text-gray-600 mb-4">You need to be logged in to see your order history.</p>
+                        <button onclick="signIn()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                            Sign In
+                        </button>
+                    </div>
+                `;
+            } else {
+                ordersList.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="package" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">No orders yet</h3>
+                        <p class="text-gray-600 mb-4">Your order history will appear here.</p>
+                        <button onclick="navigateTo('home')" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                            Start Shopping
+                        </button>
+                    </div>
+                `;
+            }
+            
+            // Re-initialize icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function loadCartPage() {
+            const cartItems = document.getElementById('cart-items');
+            const cartSummary = document.getElementById('cart-summary');
+            if (!cartItems || !cartSummary) return;
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="shopping-cart" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Your cart is empty</h3>
+                        <p class="text-gray-600 mb-4">Add some products to get started!</p>
+                        <button onclick="navigateTo('home')" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                            Continue Shopping
+                        </button>
+                    </div>
+                `;
+                cartSummary.classList.add('hidden');
+            } else {
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                cartItems.innerHTML = `
+                    <div class="space-y-4">
+                        ${cart.map(item => `
+                            <div class="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
+                                <div class="flex-1">
+                                    <h3 class="font-medium text-gray-900">${item.name}</h3>
+                                    <p class="text-sm text-gray-500">₹${item.price} x ${item.quantity}</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="updateQuantity('${item.id}', -1)" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
+                                        <i data-lucide="minus" class="w-4 h-4"></i>
+                                    </button>
+                                    <span class="font-medium w-8 text-center">${item.quantity}</span>
+                                    <button onclick="updateQuantity('${item.id}', 1)" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
+                                        <i data-lucide="plus" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                cartSummary.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-lg font-bold">Total:</span>
+                        <span class="text-2xl font-bold text-green-600">₹${total}</span>
+                    </div>
+                    <button class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-medium">
+                        Proceed to Checkout
+                    </button>
+                `;
+                cartSummary.classList.remove('hidden');
+            }
+            
+            // Re-initialize icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function loadProfilePage() {
+            const profileInfo = document.getElementById('profile-info');
+            if (!profileInfo) return;
+            
+            if (!currentUser) {
+                profileInfo.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="user" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Please sign in to view profile</h3>
+                        <p class="text-gray-600 mb-4">You need to be logged in to see your profile.</p>
+                        <button onclick="signIn()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                            Sign In
+                        </button>
+                    </div>
+                `;
+            } else {
+                profileInfo.innerHTML = `
+                    <div class="bg-white rounded-lg border border-gray-200 p-6">
+                        <div class="flex items-center space-x-4 mb-6">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="user" class="w-8 h-8 text-green-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">Welcome back!</h3>
+                                <p class="text-gray-600">${currentUser.email}</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <button class="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 flex items-center justify-between">
+                                <span class="text-gray-900">Account Settings</span>
+                                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                            </button>
+                            <button class="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 flex items-center justify-between">
+                                <span class="text-gray-900">Order History</span>
+                                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                            </button>
+                            <button class="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 flex items-center justify-between">
+                                <span class="text-gray-900">Payment Methods</span>
+                                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                            </button>
+                            <button onclick="signOut()" class="w-full text-left px-4 py-3 bg-red-50 rounded-lg hover:bg-red-100 flex items-center justify-between">
+                                <span class="text-red-600">Sign Out</span>
+                                <i data-lucide="log-out" class="w-5 h-5 text-red-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Re-initialize icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
             }
         }
 
@@ -696,6 +889,20 @@
             } catch (error) {
                 console.error('Sign in error:', error);
                 showToast('Failed to sign in. Please try again.');
+            }
+        }
+
+        async function signOut() {
+            try {
+                await supabaseClient.auth.signOut();
+                currentUser = null;
+                cart = [];
+                updateCartCount();
+                showToast('Signed out successfully');
+                navigateTo('home');
+            } catch (error) {
+                console.error('Sign out error:', error);
+                showToast('Failed to sign out');
             }
         }
 
