@@ -33,3 +33,8 @@ dist-ssr
 # Build artifacts
 build/
 *.tsbuildinfo
+
+# PHP files (not used in this project)
+composer.lock
+vendor/
+*.php

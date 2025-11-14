@@ -1,0 +1,7 @@
+{
+  "type": "nodejs",
+  "version": "18",
+  "build_command": "npm run build",
+  "publish_directory": "dist",
+  "install_command": "npm install"
+}

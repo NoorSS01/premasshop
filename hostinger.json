@@ -1,0 +1,14 @@
+{
+  "name": "premasshop",
+  "type": "nodejs",
+  "build": {
+    "command": "npm run build",
+    "directory": "dist"
+  },
+  "node": {
+    "version": "18"
+  },
+  "install": {
+    "command": "npm install"
+  }
+}
