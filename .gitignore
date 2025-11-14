@@ -35,3 +35,11 @@ Thumbs.db
 logs
 *.log
 npm-debug.log*
+
+# PHP/Composer files (not needed for React deployment)
+composer.lock
+composer.json
+vendor/
+deploy.php
+build.sh
+.hostinger.yml

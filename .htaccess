@@ -50,3 +50,29 @@ RewriteRule . /index.html [L]
     ExpiresByType image/gif "access plus 1 year"
     ExpiresByType image/svg+xml "access plus 1 year"
 </IfModule>
+
+# Disable PHP execution (this is a React app, not PHP)
+<Files "*.php">
+    Require all denied
+</Files>
+
+# Prevent access to composer files
+<Files "composer.*">
+    Require all denied
+</Files>
+
+# Prevent access to vendor directory
+<Directory "vendor">
+    Require all denied
+</Directory>
+
+# Set default content type for static files
+<IfModule mod_mime.c>
+    AddType text/html .html
+    AddType text/css .css
+    AddType application/javascript .js
+    AddType image/svg+xml .svg
+    AddType image/png .png
+    AddType image/jpeg .jpg
+    AddType image/gif .gif
+</IfModule>
