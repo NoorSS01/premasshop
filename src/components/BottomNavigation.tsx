@@ -1,5 +1,4 @@
 import { Home, ShoppingBag, User, Package } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { useCart } from '@/hooks/useCart'
 
 interface BottomNavigationProps {

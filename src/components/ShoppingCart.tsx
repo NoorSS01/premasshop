@@ -1,4 +1,4 @@
-import { X, Plus, Minus, Trash2 } from 'lucide-react'
+import { Plus, Minus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCart } from '@/hooks/useCart'

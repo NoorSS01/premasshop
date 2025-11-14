@@ -1,5 +1,4 @@
 import { categories } from '@/data/mockData'
-import { Category } from '@/types'
 
 interface CategoryGridProps {
   onCategorySelect: (category: string) => void
