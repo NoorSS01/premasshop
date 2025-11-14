@@ -1,0 +1,8 @@
+node_modules
+dist
+build
+.vite
+frontend/dist
+functions/**/node_modules
+
+

@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+npx prettier --check .
+npx eslint "frontend/src/**/*.{ts,tsx}" --max-warnings=0
+
+

@@ -1,0 +1,14 @@
+{
+  "name": "premas-shop-functions",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "supabase functions serve",
+    "deploy": "supabase functions deploy"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "crypto": "^1.0.1"
+  }
+}
+
