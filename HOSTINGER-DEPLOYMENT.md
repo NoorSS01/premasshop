@@ -14,9 +14,9 @@
 
 2. **Find your website** → Click on it
 
-3. **Look for "GitHub" or "Git" section** → Click "Manage"
+3.  Look for "GitHub" or "Git" section → Click "Manage"
 
-4. **Find "Environment Variables" or "Build Settings"**
+4. Find "Environment Variables" or "Build Settings"
 
 5. **Add these variables:**
    ```
