@@ -1,54 +1,889 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- Primary Meta Tags -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premas Shop - Fresh Essentials Delivered Fast</title>
-    <meta name="title" content="Premas Shop - Fresh Essentials Delivered Fast" />
-    <meta name="description" content="Get your daily essentials delivered to your doorstep in minutes. Fresh water, groceries, and more. Quick, reliable, and friendly service you can trust." />
-    <meta name="keywords" content="water delivery, quick commerce, grocery delivery, fresh essentials, online shopping, fast delivery" />
-    <meta name="author" content="Premas Shop" />
-    <meta name="robots" content="index, follow" />
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://premas.shop/" />
-    <meta property="og:title" content="Premas Shop - Fresh Essentials Delivered Fast" />
-    <meta property="og:description" content="Get your daily essentials delivered to your doorstep in minutes. Fresh water, groceries, and more. Quick, reliable, and friendly service you can trust." />
-    <meta property="og:image" content="https://premas.shop/og-image.jpg" />
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://premas.shop/" />
-    <meta property="twitter:title" content="Premas Shop - Fresh Essentials Delivered Fast" />
-    <meta property="twitter:description" content="Get your daily essentials delivered to your doorstep in minutes. Fresh water, groceries, and more. Quick, reliable, and friendly service you can trust." />
-    <meta property="twitter:image" content="https://premas.shop/og-image.jpg" />
-    
-    <!-- Additional Meta Tags -->
-    <meta name="theme-color" content="#16a34a" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Premas Shop" />
-    
-    <!-- Apple Touch Icon -->
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    
-    <!-- Manifest -->
-    <link rel="manifest" href="/manifest.json" />
-    
-    <!-- Preconnect to external domains -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://kpyvndiqvwushuhwxvon.supabase.co" />
-    <script type="module" crossorigin src="/assets/index-CZCytVlW.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-eh0-pu6w.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+    <meta name="description" content="Get your daily essentials delivered to your doorstep in minutes. Fresh water, groceries, and more.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .line-clamp-1 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+        }
+        .line-clamp-2 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .toast-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <!-- Header -->
+        <header class="bg-green-600 text-white sticky top-0 z-40">
+            <div class="px-4 py-3">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-lg">P</span>
+                        </div>
+                        <div>
+                            <p class="text-lg font-bold">Premas Shop</p>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <button
+                            id="cart-btn"
+                            class="relative p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+                        >
+                            <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                            <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                    <input
+                        type="text"
+                        id="search-input"
+                        placeholder="Search for products..."
+                        class="w-full pl-10 pr-4 py-2 bg-white text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                    />
+                </div>
+            </div>
+        </header>
+
+        <!-- Promotional Banner -->
+        <section class="px-4 py-4">
+            <div class="bg-gradient-to-r from-orange-400 to-red-500 rounded-lg p-4 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold mb-1">30% OFF</h2>
+                        <p class="text-sm opacity-90">On your first order</p>
+                        <p class="text-xs opacity-75 mt-1">Valid till 31st Dec</p>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2">
+                        <i data-lucide="package" class="w-6 h-6 text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories -->
+        <section class="px-4 py-2">
+            <div class="flex space-x-4 overflow-x-auto pb-2">
+                <button class="category-btn flex flex-col items-center space-y-2 min-w-fit" data-category="all">
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="grid-3x3" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <span class="text-xs text-gray-700 font-medium">All</span>
+                </button>
+                <button class="category-btn flex flex-col items-center space-y-2 min-w-fit" data-category="fruits">
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="package" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <span class="text-xs text-gray-700 font-medium">Fruits</span>
+                </button>
+                <button class="category-btn flex flex-col items-center space-y-2 min-w-fit" data-category="vegetables">
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="package" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <span class="text-xs text-gray-700 font-medium">Vegetables</span>
+                </button>
+                <button class="category-btn flex flex-col items-center space-y-2 min-w-fit" data-category="dairy">
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="package" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <span class="text-xs text-gray-700 font-medium">Dairy</span>
+                </button>
+                <button class="category-btn flex flex-col items-center space-y-2 min-w-fit" data-category="snacks">
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="package" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <span class="text-xs text-gray-700 font-medium">Snacks</span>
+                </button>
+                <button class="category-btn flex flex-col items-center space-y-2 min-w-fit" data-category="beverages">
+                    <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i data-lucide="package" class="w-6 h-6 text-green-600"></i>
+                    </div>
+                    <span class="text-xs text-gray-700 font-medium">Beverages</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Home Page Content -->
+        <section id="home-content" class="px-4 py-4">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-bold text-gray-900">All Products</h2>
+                <p class="text-sm text-gray-600"><span id="products-count">0</span> items</p>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="loading-state" class="grid grid-cols-2 gap-4">
+                <div class="bg-white rounded-lg border border-gray-200 p-3 animate-pulse">
+                    <div class="aspect-square bg-gray-100 rounded-lg mb-3"></div>
+                    <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+                </div>
+                <div class="bg-white rounded-lg border border-gray-200 p-3 animate-pulse">
+                    <div class="aspect-square bg-gray-100 rounded-lg mb-3"></div>
+                    <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="text-center py-12 hidden">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="package" class="w-8 h-8 text-gray-400"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">No products found</h3>
+                <p class="text-sm text-gray-600">Try adjusting your search</p>
+            </div>
+
+            <!-- Products Grid -->
+            <div id="products-grid" class="grid grid-cols-2 gap-4 hidden">
+                <!-- Products will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Orders Page Content -->
+        <section id="orders-content" class="px-4 py-4 hidden">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">My Orders</h1>
+                <div id="orders-list" class="space-y-4">
+                    <!-- Orders will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Cart Page Content -->
+        <section id="cart-content" class="px-4 py-4 hidden">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Shopping Cart</h1>
+                <div id="cart-items" class="space-y-4">
+                    <!-- Cart items will be loaded here -->
+                </div>
+                <div id="cart-summary" class="border-t pt-4 mt-6 hidden">
+                    <!-- Cart summary will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Page Content -->
+        <section id="profile-content" class="px-4 py-4 hidden">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Profile</h1>
+                <div id="profile-info" class="space-y-4">
+                    <!-- Profile info will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Custom View Cart Toast -->
+        <div id="view-cart-toast" class="fixed top-20 right-4 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50 hidden toast-slide-in">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="shopping-cart" class="w-5 h-5 text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900">Added to cart!</p>
+                        <p class="text-sm text-gray-600"><span id="toast-product-name">Product</span> (<span id="toast-quantity">1</span>)</p>
+                    </div>
+                </div>
+                <button id="close-toast" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="mt-3">
+                <button class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded-lg text-sm flex items-center justify-center" onclick="navigateTo('cart')">
+                    <i data-lucide="shopping-cart" class="w-4 h-4 mr-2"></i>
+                    View Cart
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+            <div class="grid grid-cols-4 py-2">
+                <a href="#" onclick="navigateTo('home'); return false;" class="nav-btn flex flex-col items-center space-y-1 py-2">
+                    <i data-lucide="home" class="w-5 h-5 text-green-600"></i>
+                    <span class="text-xs text-green-600 font-medium">Home</span>
+                </a>
+                <a href="#" onclick="navigateTo('orders'); return false;" class="nav-btn flex flex-col items-center space-y-1 py-2">
+                    <i data-lucide="package" class="w-5 h-5 text-gray-400"></i>
+                    <span class="text-xs text-gray-400">Orders</span>
+                </a>
+                <a href="#" onclick="navigateTo('cart'); return false;" class="nav-btn flex flex-col items-center space-y-1 py-2 relative">
+                    <i data-lucide="shopping-cart" class="w-5 h-5 text-gray-400"></i>
+                    <span class="text-xs text-gray-400">Cart</span>
+                    <span id="bottom-nav-cart-count" class="absolute top-1 right-4 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center hidden">0</span>
+                </a>
+                <a href="#" onclick="navigateTo('profile'); return false;" class="nav-btn flex flex-col items-center space-y-1 py-2">
+                    <i data-lucide="user" class="w-5 h-5 text-gray-400"></i>
+                    <span class="text-xs text-gray-400">Profile</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://kpyvndiqvwushuhwxvon.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtweXZuZGlxdnd1c2h1aHd4dm9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1ODU0OTIsImV4cCI6MjA3ODE2MTQ5Mn0.TqoLz-r-XZpRvyWhBXyKKQjTrpSGX4bGwQHIM3kGTMs';
+        
+        // Initialize Supabase
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // App State
+        let cart = [];
+        let products = [];
+        let currentUser = null;
+        let isLoading = true;
+
+        // Initialize app
+        function initApp() {
+            console.log('Initializing Premas Shop...');
+            
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Load app
+            loadApp();
+        }
+
+        async function loadApp() {
+            try {
+                // Check authentication
+                await checkAuth();
+                
+                // Load products
+                await loadProducts();
+                
+                // Hide loading state
+                isLoading = false;
+                updateUI();
+                
+            } catch (error) {
+                console.error('Failed to load app:', error);
+                isLoading = false;
+                updateUI();
+            }
+        }
+
+        async function checkAuth() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                currentUser = session?.user || null;
+                
+                if (currentUser) {
+                    await loadUserCart();
+                }
+                
+                // Listen for auth changes
+                supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                    currentUser = session?.user || null;
+                    if (currentUser) {
+                        await loadUserCart();
+                    } else {
+                        cart = [];
+                        updateCartCount();
+                    }
+                });
+            } catch (error) {
+                console.error('Auth check failed:', error);
+            }
+        }
+
+        async function loadUserCart() {
+            if (!currentUser) return;
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('cart_items')
+                    .select('*, products(*)')
+                    .eq('user_id', currentUser.id);
+                
+                if (error) throw error;
+                
+                cart = data?.map(item => ({
+                    id: item.product_id,
+                    name: item.products.name,
+                    description: item.products.description,
+                    price: item.products.price,
+                    cost_price: item.products.cost_price,
+                    quantity: item.quantity
+                })) || [];
+                
+                updateCartCount();
+            } catch (error) {
+                console.error('Failed to load user cart:', error);
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('status', 'active')
+                    .order('name');
+                
+                if (error) throw error;
+                products = data || [];
+                renderProducts(products);
+            } catch (error) {
+                console.error('Failed to load products:', error);
+                products = [];
+                renderProducts(products);
+            }
+        }
+
+        function updateUI() {
+            const loadingState = document.getElementById('loading-state');
+            const emptyState = document.getElementById('empty-state');
+            const productsGrid = document.getElementById('products-grid');
+            
+            if (isLoading) {
+                loadingState.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+                productsGrid.classList.add('hidden');
+            } else if (products.length === 0) {
+                loadingState.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                productsGrid.classList.add('hidden');
+            } else {
+                loadingState.classList.add('hidden');
+                emptyState.classList.add('hidden');
+                productsGrid.classList.remove('hidden');
+            }
+            
+            // Update products count
+            document.getElementById('products-count').textContent = products.length;
+        }
+
+        function renderProducts(productsToRender) {
+            const grid = document.getElementById('products-grid');
+            if (!grid) return;
+            
+            grid.innerHTML = productsToRender.map(product => {
+                const quantity = getCartItemQuantity(product.id);
+                const hasDiscount = product.cost_price && product.cost_price > product.price;
+                const discountPercentage = hasDiscount ? Math.round(((product.cost_price - product.price) / product.cost_price) * 100) : 0;
+                
+                return `
+                    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col h-full">
+                        <div class="relative">
+                            <div class="aspect-square bg-gray-50 flex items-center justify-center">
+                                <i data-lucide="package" class="w-12 h-12 text-gray-400"></i>
+                            </div>
+                            ${hasDiscount ? `
+                                <div class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                    ${discountPercentage}% OFF
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="p-3 flex flex-col flex-1">
+                            <div class="flex-1">
+                                <h3 class="font-medium text-gray-900 mb-1 text-sm line-clamp-2">
+                                    ${product.name}
+                                </h3>
+                                <p class="text-xs text-gray-500 mb-2 line-clamp-1">${product.description || ''}</p>
+                            </div>
+                            
+                            <div class="flex items-center justify-between mb-2">
+                                <div>
+                                    <span class="text-base font-bold text-gray-900">
+                                        ₹${product.price}
+                                    </span>
+                                    ${hasDiscount ? `
+                                        <span class="text-xs text-gray-500 line-through ml-1">
+                                            ₹${product.cost_price}
+                                        </span>
+                                    ` : ''}
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <i data-lucide="star" class="w-3 h-3 text-yellow-400 fill-current"></i>
+                                    <span class="text-xs text-gray-600">4.5</span>
+                                </div>
+                            </div>
+
+                            ${quantity > 0 ? `
+                                <div class="flex items-center justify-between bg-green-50 rounded-lg p-1">
+                                    <button 
+                                        class="text-green-600 hover:bg-green-100 h-7 w-7 p-0 rounded flex items-center justify-center"
+                                        onclick="updateQuantity('${product.id}', -1)"
+                                    >
+                                        <i data-lucide="minus" class="w-3 h-3"></i>
+                                    </button>
+                                    <span class="font-medium text-gray-900 text-sm">${quantity}</span>
+                                    <button 
+                                        class="text-green-600 hover:bg-green-100 h-7 w-7 p-0 rounded flex items-center justify-center"
+                                        onclick="updateQuantity('${product.id}', 1)"
+                                    >
+                                        <i data-lucide="plus" class="w-3 h-3"></i>
+                                    </button>
+                                </div>
+                            ` : `
+                                <button
+                                    class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded-lg text-sm flex items-center justify-center"
+                                    onclick="handleAddToCart('${product.id}', '${product.name}', ${product.price})"
+                                >
+                                    <i data-lucide="plus" class="w-3 h-3 mr-1"></i>
+                                    Add
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Re-initialize icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function getCartItemQuantity(productId) {
+            const item = cart.find(item => item.id === productId);
+            return item?.quantity || 0;
+        }
+
+        async function handleAddToCart(productId, productName, productPrice) {
+            if (!currentUser) {
+                showToast('Please sign in to add items to cart');
+                return;
+            }
+            
+            try {
+                const { error } = await supabaseClient
+                    .from('cart_items')
+                    .upsert({
+                        user_id: currentUser.id,
+                        product_id: productId,
+                        quantity: 1
+                    }, {
+                        onConflict: 'user_id,product_id'
+                    });
+                
+                if (error) throw error;
+                
+                await loadUserCart();
+                
+                const newQuantity = getCartItemQuantity(productId);
+                showViewCartToast(productName, newQuantity);
+            } catch (error) {
+                console.error('Failed to add to cart:', error);
+                showToast('Failed to add to cart');
+            }
+        }
+
+        async function updateQuantity(productId, change) {
+            const item = cart.find(item => item.id === productId);
+            if (!item) return;
+            
+            const newQuantity = item.quantity + change;
+            
+            try {
+                if (newQuantity > 0) {
+                    await supabaseClient
+                        .from('cart_items')
+                        .update({ quantity: newQuantity })
+                        .eq('user_id', currentUser.id)
+                        .eq('product_id', productId);
+                } else {
+                    await supabaseClient
+                        .from('cart_items')
+                        .delete()
+                        .eq('user_id', currentUser.id)
+                        .eq('product_id', productId);
+                }
+                
+                await loadUserCart();
+                renderProducts(products);
+            } catch (error) {
+                console.error('Failed to update quantity:', error);
+            }
+        }
+
+        function updateCartCount() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const cartCount = document.getElementById('cart-count');
+            const bottomNavCartCount = document.getElementById('bottom-nav-cart-count');
+            
+            if (cartCount) {
+                if (totalItems > 0) {
+                    cartCount.textContent = totalItems;
+                    cartCount.classList.remove('hidden');
+                } else {
+                    cartCount.classList.add('hidden');
+                }
+            }
+            
+            if (bottomNavCartCount) {
+                if (totalItems > 0) {
+                    bottomNavCartCount.textContent = totalItems;
+                    bottomNavCartCount.classList.remove('hidden');
+                } else {
+                    bottomNavCartCount.classList.add('hidden');
+                }
+            }
+        }
+
+        function showViewCartToast(productName, quantity) {
+            const toast = document.getElementById('view-cart-toast');
+            const productNameEl = document.getElementById('toast-product-name');
+            const quantityEl = document.getElementById('toast-quantity');
+            
+            if (productNameEl) productNameEl.textContent = productName;
+            if (quantityEl) quantityEl.textContent = quantity;
+            
+            toast.classList.remove('hidden');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 5000);
+        }
+
+        function showToast(message) {
+            // Simple toast implementation
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-20 right-4 bg-white rounded-lg shadow-lg border border-gray-200 p-4 z-50 toast-slide-in';
+            toast.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <i data-lucide="shopping-cart" class="w-4 h-4 text-green-600"></i>
+                    </div>
+                    <p class="text-sm text-gray-900">${message}</p>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Re-initialize icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function navigateTo(page) {
+            // Hide all page content
+            document.getElementById('home-content').classList.add('hidden');
+            document.getElementById('orders-content').classList.add('hidden');
+            document.getElementById('cart-content').classList.add('hidden');
+            document.getElementById('profile-content').classList.add('hidden');
+            
+            // Show the selected page content
+            document.getElementById(`${page}-content`).classList.remove('hidden');
+            
+            // Update bottom navigation active state
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const icon = btn.querySelector('i');
+                const span = btn.querySelector('span');
+                if (btn.getAttribute('onclick')?.includes(page)) {
+                    icon.classList.remove('text-gray-400');
+                    icon.classList.add('text-green-600');
+                    span.classList.remove('text-gray-400');
+                    span.classList.add('text-green-600', 'font-medium');
+                } else {
+                    icon.classList.remove('text-green-600');
+                    icon.classList.add('text-gray-400');
+                    span.classList.remove('text-green-600', 'font-medium');
+                    span.classList.add('text-gray-400');
+                }
+            });
+            
+            // Load page-specific content
+            if (page === 'home') {
+                // Home content is already loaded
+            } else if (page === 'orders') {
+                loadOrdersPage();
+            } else if (page === 'cart') {
+                loadCartPage();
+            } else if (page === 'profile') {
+                loadProfilePage();
+            }
+            
+            // Re-initialize icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function loadOrdersPage() {
+            const ordersList = document.getElementById('orders-list');
+            if (!ordersList) return;
+            
+            if (!currentUser) {
+                ordersList.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="package" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Please sign in to view orders</h3>
+                        <p class="text-gray-600 mb-4">You need to be logged in to see your order history.</p>
+                        <button onclick="signIn()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                            Sign In
+                        </button>
+                    </div>
+                `;
+            } else {
+                ordersList.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="package" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">No orders yet</h3>
+                        <p class="text-gray-600 mb-4">Your order history will appear here.</p>
+                        <button onclick="navigateTo('home')" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                            Start Shopping
+                        </button>
+                    </div>
+                `;
+            }
+            
+            // Re-initialize icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function loadCartPage() {
+            const cartItems = document.getElementById('cart-items');
+            const cartSummary = document.getElementById('cart-summary');
+            if (!cartItems || !cartSummary) return;
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="shopping-cart" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Your cart is empty</h3>
+                        <p class="text-gray-600 mb-4">Add some products to get started!</p>
+                        <button onclick="navigateTo('home')" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                            Continue Shopping
+                        </button>
+                    </div>
+                `;
+                cartSummary.classList.add('hidden');
+            } else {
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                cartItems.innerHTML = `
+                    <div class="space-y-4">
+                        ${cart.map(item => `
+                            <div class="bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-between">
+                                <div class="flex-1">
+                                    <h3 class="font-medium text-gray-900">${item.name}</h3>
+                                    <p class="text-sm text-gray-500">₹${item.price} x ${item.quantity}</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="updateQuantity('${item.id}', -1)" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
+                                        <i data-lucide="minus" class="w-4 h-4"></i>
+                                    </button>
+                                    <span class="font-medium w-8 text-center">${item.quantity}</span>
+                                    <button onclick="updateQuantity('${item.id}', 1)" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
+                                        <i data-lucide="plus" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                cartSummary.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-lg font-bold">Total:</span>
+                        <span class="text-2xl font-bold text-green-600">₹${total}</span>
+                    </div>
+                    <button class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 font-medium">
+                        Proceed to Checkout
+                    </button>
+                `;
+                cartSummary.classList.remove('hidden');
+            }
+            
+            // Re-initialize icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function loadProfilePage() {
+            const profileInfo = document.getElementById('profile-info');
+            if (!profileInfo) return;
+            
+            if (!currentUser) {
+                profileInfo.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i data-lucide="user" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Please sign in to view profile</h3>
+                        <p class="text-gray-600 mb-4">You need to be logged in to see your profile.</p>
+                        <button onclick="signIn()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                            Sign In
+                        </button>
+                    </div>
+                `;
+            } else {
+                profileInfo.innerHTML = `
+                    <div class="bg-white rounded-lg border border-gray-200 p-6">
+                        <div class="flex items-center space-x-4 mb-6">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="user" class="w-8 h-8 text-green-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">Welcome back!</h3>
+                                <p class="text-gray-600">${currentUser.email}</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <button class="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 flex items-center justify-between">
+                                <span class="text-gray-900">Account Settings</span>
+                                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                            </button>
+                            <button class="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 flex items-center justify-between">
+                                <span class="text-gray-900">Order History</span>
+                                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                            </button>
+                            <button class="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 flex items-center justify-between">
+                                <span class="text-gray-900">Payment Methods</span>
+                                <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+                            </button>
+                            <button onclick="signOut()" class="w-full text-left px-4 py-3 bg-red-50 rounded-lg hover:bg-red-100 flex items-center justify-between">
+                                <span class="text-red-600">Sign Out</span>
+                                <i data-lucide="log-out" class="w-5 h-5 text-red-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Re-initialize icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        async function signIn() {
+            const email = prompt('Enter your email to sign in:');
+            if (!email) return;
+            
+            try {
+                const { error } = await supabaseClient.auth.signInWithOtp({
+                    email: email,
+                    options: {
+                        emailRedirectTo: window.location.href
+                    }
+                });
+                
+                if (error) throw error;
+                showToast('Check your email for the sign-in link!');
+            } catch (error) {
+                console.error('Sign in error:', error);
+                showToast('Failed to sign in. Please try again.');
+            }
+        }
+
+        async function signOut() {
+            try {
+                await supabaseClient.auth.signOut();
+                currentUser = null;
+                cart = [];
+                updateCartCount();
+                showToast('Signed out successfully');
+                navigateTo('home');
+            } catch (error) {
+                console.error('Sign out error:', error);
+                showToast('Failed to sign out');
+            }
+        }
+
+        function setupEventListeners() {
+            // Cart button
+            const cartBtn = document.getElementById('cart-btn');
+            if (cartBtn) {
+                cartBtn.addEventListener('click', () => {
+                    navigateTo('cart');
+                });
+            }
+            
+            // Close toast
+            const closeToast = document.getElementById('close-toast');
+            if (closeToast) {
+                closeToast.addEventListener('click', () => {
+                    document.getElementById('view-cart-toast').classList.add('hidden');
+                });
+            }
+            
+            // Search
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const query = e.target.value.toLowerCase();
+                    const filtered = products.filter(p => 
+                        p.name.toLowerCase().includes(query) || 
+                        (p.description && p.description.toLowerCase().includes(query))
+                    );
+                    renderProducts(filtered);
+                });
+            }
+            
+            // Categories
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const category = this.dataset.category;
+                    if (category === 'all') {
+                        renderProducts(products);
+                    } else {
+                        const filtered = products.filter(p => p.category === category);
+                        renderProducts(filtered);
+                    }
+                });
+            });
+        }
+
+        // Start the app immediately
+        initApp();
+
+        console.log('Premas Shop loaded!');
+    </script>
+</body>
 </html>
